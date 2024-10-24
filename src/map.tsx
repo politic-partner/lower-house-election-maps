@@ -158,7 +158,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
                 <div className="flex flex-wrap gap-1">
                     <span className="text-xs ">⌕</span>
                     <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${name_joined} 不祥事 裏金 統一教会`}>不祥事</NewsLink>
-                    <NewsLink href={`https://news.google.com/search?q=衆議院選挙 ${name_joined} ニュース`}>ニュース</NewsLink>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${name_joined} ニュース`}>ニュース</NewsLink>
                 </div>
                 <div className="flex flex-wrap gap-1">
                     <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
