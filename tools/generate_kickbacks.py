@@ -20,9 +20,8 @@ duplicate_names = set(
 
 name2candidates = {candidate["name"]: candidate for candidate in candidates.values()}
 
-districts = json.loads(paths.districts_json_file.read_text(encoding="utf-8"))
-name2districts = {district["name"]: district for district in districts.values()}
-
+DISTRICTS = json.loads(paths.districts_json_file.read_text(encoding="utf-8"))
+name2districts = {district["name"]: district for district in DISTRICTS.values()}
 
 blocks = json.loads(paths.blocks_json_file.read_text(encoding="utf-8"))
 name2blocks = {block["name"]: block for block in blocks.values()}
@@ -82,7 +81,17 @@ for kickback_id, line in enumerate(
 
     if name in name2candidates:
         kickback["face_url"] = None
-        kickbacks["candidates"][name2candidates[name]["id"]] = kickback_id
+        candidate = name2candidates[name]
+        candidate_id = candidate["id"]
+        kickbacks["candidates"][candidate_id] = kickback_id
+
+        district_id = candidate["did"]
+        if district_id is not None:
+            # 該当の candidate を該当の district の先頭に移動
+            district = DISTRICTS[district_id]
+            district["cids"].remove(candidate_id)
+            district["cids"].insert(0, candidate_id)
+
         continue
 
     if len(districts) == len(blocks) == 0:
@@ -168,5 +177,10 @@ paths.layer_icon_block_kickbacks_json_file.write_text(
         ensure_ascii=False,
         indent=2,
     ),
+    encoding="utf-8",
+)
+
+paths.districts_json_file.write_text(
+    json.dumps(DISTRICTS, ensure_ascii=False, indent=2),
     encoding="utf-8",
 )
