@@ -93,6 +93,10 @@ districts = {}
 candidates = {}
 blocks = {}
 
+name_wrong2corrects = {
+    "三ツ林　裕己": "三ッ林　裕巳",
+}
+
 
 def to_candidate(
     element: xml.etree.ElementTree.Element,
@@ -100,9 +104,10 @@ def to_candidate(
     block_id: Optional[str],
     party_id: Optional[str] = None,
 ) -> Candidate:
+    name = element.text
     return Candidate(
         id=element.attrib["khId"],
-        name=element.text,
+        name=name_wrong2corrects.get(name, name),
         name_kana=element.attrib["khNmKana"],
         pid=party_id or name2parties[element.attrib["prtyNm"]].id,
         age=int(element.attrib["age"]),
