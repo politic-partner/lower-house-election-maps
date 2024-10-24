@@ -32,6 +32,7 @@ type DistrictKey = keyof typeof districts;
 type KickbackDetailKey = keyof typeof kickbacks.details;
 type KickbackDetail = typeof kickbacks.details[KickbackDetailKey];
 type KickbackDistrictKey = keyof typeof kickbacks.not_runs.districts;
+type KickbackCandidateKey = keyof typeof kickbacks.candidates;
 type DistrictName = typeof textDistrictNames[number];
 type DistrictFeature = typeof geojsonDistricts.features[number];
 type DistrictProperties = DistrictFeature['properties'];
@@ -140,7 +141,7 @@ function NewsLink({ href, children }: { href: string, children: React.ReactNode 
 
 function CandidateCard({ candidate }: { candidate: Candidate }) {
     const party = parties[candidate.pid as PartyKey];
-    const kickbackId = kickbacks.candidates[candidate.id as keyof typeof kickbacks.candidates];
+    const kickbackId = kickbacks.candidates[candidate.id as KickbackCandidateKey];
     const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
     const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
     const name_joined = candidate.name.replace(" ", "");
@@ -163,8 +164,8 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
                 <div className="flex flex-wrap gap-1">
                     <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
                     <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">{candidate.status}{candidate.win_count === 0 ? <></> : <span> 当選{candidate.win_count}回</span>}</span>
-                    {candidate.endorser && <span className="bg-blue-100 text-blue-800 text-xs  px-2.5 py-0.5 rounded">{candidate.endorser}</span>}
-                    {candidate.supporter && <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">{candidate.supporter}</span>}
+                    {candidate.endorser && <span className="bg-blue-100 text-blue-800 text-xs  px-2.5 py-0.5 rounded">{candidate.endorser}推薦</span>}
+                    {candidate.supporter && <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">{candidate.supporter}支持</span>}
                     {kickback && <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金<span className="text-xs">{kickback.amount}</span>万円</span>}
                     {cult && <span className="bg-gray-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">カルト度{cult.point}</span>}
                     {cult && cult.links.map((link, index) => <span key={index} className="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">{link}</span>)}
@@ -196,7 +197,7 @@ function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate,
     let warning = null;
 
     if (showScandal) {
-        const kickbackId = kickbacks.candidates[candidate.id as keyof typeof kickbacks.candidates];
+        const kickbackId = kickbacks.candidates[candidate.id as KickbackCandidateKey];
         const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
 
         if (kickback) {
@@ -228,10 +229,10 @@ function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate,
 
 function CandidateSmall({ candidateId }: { candidateId: CandidateKey }) {
     const candidate = candidates[candidateId];
-    return <div key={candidateId} className="flex-none p-3">
+    return <div className="flex-none p-3 h-24 overflow-hidden">
         <div className="w-16 h-16 flex flex-col items-center justify-center overflow-visible">
             <CandidateFace candidate={candidate} size={16} showScandal={true} />
-            <span className="text-slate-900 text-xs font-bold"><CandidateName name={candidate.name} kana={candidate.name_kana} /></span>
+            <span className="text-slate-900 text-xs h-6 font-bold"><CandidateName name={candidate.name} kana={candidate.name_kana} /></span>
         </div>
     </div>
 }
@@ -241,7 +242,7 @@ function NotRunSmall({ kickbackId }: { kickbackId: KickbackDetailKey }) {
     return <div className="flex-none p-3">
         <div className="w-16 h-16 flex flex-col items-center justify-center overflow-visible">
             <KickbackFace kickback={kickback} size={16} showScandal={true} />
-            <span className="text-slate-900 text-xs font-bold"><CandidateName name={kickback.name} /></span>
+            <span className="text-slate-900 text-xs h-6 font-bold"><CandidateName name={kickback.name} /></span>
         </div>
     </div>
 }
@@ -314,16 +315,17 @@ function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, s
     // const block = blocks[district.bid as BlockKey];
     const districtKickbacks = kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => kickbacks.details[kid as KickbackDetailKey]);
     return <SheetFull setSheetSize={setSheetSize}>
-        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
-        <button
-            type="button"
-            className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-            onClick={() => setSheetSize(SheetSize.Small)}
-        >
-            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-        </button>
+        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span>
+            <button
+                type="button"
+                className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                onClick={() => setSheetSize(SheetSize.Small)}
+            >
+                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
+        </h5>
         <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
             {district.cids.map((cid) => <CandidateCard key={cid} candidate={candidates[cid as CandidateKey]} />)}
             {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} />)}
@@ -395,7 +397,7 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
                 <div className="flex items-end justify-center text-center">
                     <div className="h-dvh w-full overflow-y-scroll bg-white text-left">
                         <div className="relative bg-white px-4 pt-5">
-                            <h1 className="sticky top-0 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選2024候補者マップ</h1>
+                            <h1 className="sticky top-0 mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選2024候補者マップ</h1>
                             <button
                                 type="button"
                                 className="fixed top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
@@ -406,7 +408,7 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
                                 </svg>
                             </button>
 
-                            <h3 className="mt-2 text-3xl font-semibold text-gray-900">データ引用元</h3>
+                            <h3 className="mt-2 text-2xl font-semibold text-gray-900">データ引用元</h3>
                             <p className="my-4">
                                 <ul className="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
                                     <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
@@ -436,7 +438,7 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
                                 </ul>
                             </p>
 
-                            <h3 className="mt-2 text-3xl font-semibold text-gray-900">利用サービス</h3>
+                            <h3 className="mt-2 text-2xl font-semibold text-gray-900">利用サービス</h3>
                             <p className="my-4">
                                 <ul className="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
                                     <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
