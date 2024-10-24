@@ -5,7 +5,7 @@ import paths
 import shapely
 import shapely.ops
 import utils
-from district_translations import area_expands, prefecture_suffix
+from district_mapping import area_expands, prefecture_suffix
 
 
 def expand(prefix: str, t: dict | list) -> list[str]:

@@ -100,6 +100,7 @@ function PartyLabel({ party, disabled, className, children }: { party: Party, di
 
 function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
     const party = parties["1"];
+    const name_joined = kickback.name.replace(" ", "");
     return <div
         className="w-full align-top flex p-2 bg-white-100 opacity-50 md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
     >
@@ -111,12 +112,8 @@ function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
             <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap gap-1">
                     <span className="text-xs ">⌕</span>
-                    <a className="inline-flex items-center text-xs py-0.5 text-blue-600 hover:underline" href={`https://perplexity.ai/search?q=衆議院選挙 ${kickback.name} 不祥事 裏金 統一教会`} target="_blank" rel="noopener noreferrer">
-                        不祥事<span aria-hidden="true">→</span>
-                    </a>
-                    <a className="inline-flex items-center text-xs py-0.5 text-blue-600 hover:underline" href={`https://perplexity.ai/search?q=衆議院選挙 ${kickback.name} ニュース`} target="_blank" rel="noopener noreferrer">
-                        ニュース<span aria-hidden="true">→</span>
-                    </a>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${name_joined} 不祥事 裏金 統一教会`}>不祥事</NewsLink>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${name_joined} ニュース`}>ニュース</NewsLink>
                 </div>
                 <div className="flex flex-wrap gap-1">
                     <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
@@ -146,6 +143,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
     const kickbackId = kickbacks.candidates[candidate.id as keyof typeof kickbacks.candidates];
     const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
     const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
+    const name_joined = candidate.name.replace(" ", "");
 
     return <div
         className="w-full align-top flex p-2 bg-white md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
@@ -159,8 +157,8 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
             <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap gap-1">
                     <span className="text-xs ">⌕</span>
-                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${candidate.name} 不祥事 裏金 統一教会`}>不祥事</NewsLink>
-                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${candidate.name} ニュース`}>ニュース</NewsLink>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${name_joined} 不祥事 裏金 統一教会`}>不祥事</NewsLink>
+                    <NewsLink href={`https://news.google.com/search?q=衆議院選挙 ${name_joined} ニュース`}>ニュース</NewsLink>
                 </div>
                 <div className="flex flex-wrap gap-1">
                     <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
@@ -313,7 +311,7 @@ function SheetFull({ setSheetSize, children }: { setSheetSize: (size: SheetSize)
 
 function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, setSheetSize: (size: SheetSize) => void }) {
     const district = districts[districtId];
-    const block = blocks[district.bid as BlockKey];
+    // const block = blocks[district.bid as BlockKey];
     const districtKickbacks = kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => kickbacks.details[kid as KickbackDetailKey]);
     return <SheetFull setSheetSize={setSheetSize}>
         <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
@@ -331,7 +329,11 @@ function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, s
             {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} />)}
         </div>
         <hr className="my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+
+        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">地域</h5>
+        <div className="flex flex-wrap min-w-32 mx-4 gap-1">
+            {district.areas.map((area, i) => <span key={i} className="bg-white text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-500">{area}</span>)}
+        </div>
     </SheetFull>;
 }
 
