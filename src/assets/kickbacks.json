@@ -1,0 +1,616 @@
+{
+  "details": {
+    "001": {
+      "id": "001",
+      "name": "池田 佳隆",
+      "status": "起訴",
+      "amount": 4826,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu49/candidate/img/w/ikeda-yoshitaka_l.jpg"
+    },
+    "002": {
+      "id": "002",
+      "name": "谷川 弥一",
+      "status": "略式起訴",
+      "amount": 4355,
+      "face_url": "https://news.ntv.co.jp/gimage/n24/articles/1f6cd8dfe2e847e0832778befe9f56ba/463163a1-0384-4773-8f97-bc4d6dd7b39a.jpg?w=700"
+    },
+    "003": {
+      "id": "003",
+      "name": "二階 俊博",
+      "status": "世襲",
+      "amount": 3526,
+      "face_url": "https://www.jimin.jp/member/img/nikai-toshihiro.jpg"
+    },
+    "004": {
+      "id": "004",
+      "name": "三ッ林 裕巳",
+      "status": "",
+      "amount": 2954,
+      "face_url": "https://www.jimin.jp/member/img/mitsubayashi-hiromi.jpg"
+    },
+    "005": {
+      "id": "005",
+      "name": "萩生田 光一",
+      "status": "",
+      "amount": 2728,
+      "face_url": null
+    },
+    "007": {
+      "id": "007",
+      "name": "堀井 学",
+      "status": "",
+      "amount": 2196,
+      "face_url": "https://www.jimin.jp/member/img/horii-manabu.jpg"
+    },
+    "009": {
+      "id": "009",
+      "name": "武田 良太",
+      "status": "",
+      "amount": 1926,
+      "face_url": null
+    },
+    "010": {
+      "id": "010",
+      "name": "中根 一幸",
+      "status": "",
+      "amount": 1860,
+      "face_url": null
+    },
+    "011": {
+      "id": "011",
+      "name": "平沢 勝栄",
+      "status": "",
+      "amount": 1817,
+      "face_url": null
+    },
+    "012": {
+      "id": "012",
+      "name": "簗 和生",
+      "status": "",
+      "amount": 1746,
+      "face_url": null
+    },
+    "013": {
+      "id": "013",
+      "name": "林幹 雄",
+      "status": "",
+      "amount": 1608,
+      "face_url": "https://www.jimin.jp/member/img/hayashi-motoo.jpg"
+    },
+    "014": {
+      "id": "014",
+      "name": "杉田 水脈",
+      "status": "",
+      "amount": 1564,
+      "face_url": "https://www.jimin.jp/member/img/sugita-mio.jpg"
+    },
+    "017": {
+      "id": "017",
+      "name": "宗清 皇一",
+      "status": "",
+      "amount": 1408,
+      "face_url": null
+    },
+    "018": {
+      "id": "018",
+      "name": "菅家 一郎",
+      "status": "",
+      "amount": 1289,
+      "face_url": "https://www.jimin.jp/member/img/kanke-ichiro.jpg"
+    },
+    "019": {
+      "id": "019",
+      "name": "福井 照",
+      "status": "元職",
+      "amount": 1254,
+      "face_url": "https://www.kantei.go.jp/jp/content/fukui_teru.jpg"
+    },
+    "020": {
+      "id": "020",
+      "name": "小田 原潔",
+      "status": "",
+      "amount": 1240,
+      "face_url": "https://www.jimin.jp/member/img/odawara-kiyoshi.jpg"
+    },
+    "021": {
+      "id": "021",
+      "name": "長崎 幸太郎",
+      "status": "現山梨県知事",
+      "amount": 1182,
+      "face_url": "https://www.pref.yamanashi.jp/images/280/photo2022.jpg"
+    },
+    "022": {
+      "id": "022",
+      "name": "衛藤 征士郎",
+      "status": "",
+      "amount": 1070,
+      "face_url": null
+    },
+    "023": {
+      "id": "023",
+      "name": "松野 博一",
+      "status": "",
+      "amount": 1051,
+      "face_url": null
+    },
+    "024": {
+      "id": "024",
+      "name": "高木 毅",
+      "status": "",
+      "amount": 1019,
+      "face_url": null
+    },
+    "025": {
+      "id": "025",
+      "name": "大塚 拓",
+      "status": "",
+      "amount": 994,
+      "face_url": null
+    },
+    "026": {
+      "id": "026",
+      "name": "和田 義明",
+      "status": "",
+      "amount": 990,
+      "face_url": null
+    },
+    "027": {
+      "id": "027",
+      "name": "中山 泰秀",
+      "status": "元職",
+      "amount": 908,
+      "face_url": null
+    },
+    "028": {
+      "id": "028",
+      "name": "柴山 昌彦",
+      "status": "",
+      "amount": 896,
+      "face_url": null
+    },
+    "030": {
+      "id": "030",
+      "name": "関芳 弘",
+      "status": "",
+      "amount": 836,
+      "face_url": "https://www.jimin.jp/member/img/seki-yoshihiro.jpg"
+    },
+    "032": {
+      "id": "032",
+      "name": "馳 浩",
+      "status": "現石川県知事",
+      "amount": 819,
+      "face_url": "https://www.pref.ishikawa.lg.jp/chiji/images/photo01.jpg"
+    },
+    "034": {
+      "id": "034",
+      "name": "上野 宏史",
+      "status": "元職",
+      "amount": 781,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu49/candidate/img/w/ueno-hiroshi.jpg"
+    },
+    "036": {
+      "id": "036",
+      "name": "吉野 正芳",
+      "status": "引退",
+      "amount": 660,
+      "face_url": "https://www.jimin.jp/member/img/yoshino-masayoshi.jpg"
+    },
+    "038": {
+      "id": "038",
+      "name": "尾身 朝子",
+      "status": "",
+      "amount": 623,
+      "face_url": "https://www.jimin.jp/member/img/omi-a.jpg"
+    },
+    "041": {
+      "id": "041",
+      "name": "細田 健一",
+      "status": "",
+      "amount": 564,
+      "face_url": null
+    },
+    "043": {
+      "id": "043",
+      "name": "西村 明宏",
+      "status": "",
+      "amount": 554,
+      "face_url": null
+    },
+    "044": {
+      "id": "044",
+      "name": "高鳥 修一",
+      "status": "",
+      "amount": 544,
+      "face_url": null
+    },
+    "045": {
+      "id": "045",
+      "name": "下村 博文",
+      "status": "",
+      "amount": 476,
+      "face_url": null
+    },
+    "046": {
+      "id": "046",
+      "name": "根本 幸典",
+      "status": "",
+      "amount": 420,
+      "face_url": null
+    },
+    "048": {
+      "id": "048",
+      "name": "義家 弘介",
+      "status": "",
+      "amount": 369,
+      "face_url": null
+    },
+    "049": {
+      "id": "049",
+      "name": "若林 健太",
+      "status": "",
+      "amount": 368,
+      "face_url": null
+    },
+    "051": {
+      "id": "051",
+      "name": "亀岡 偉民",
+      "status": "",
+      "amount": 348,
+      "face_url": null
+    },
+    "053": {
+      "id": "053",
+      "name": "上杉 謙太郎",
+      "status": "",
+      "amount": 309,
+      "face_url": null
+    },
+    "056": {
+      "id": "056",
+      "name": "長尾 敬",
+      "status": "元職",
+      "amount": 282,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu49/candidate/img/w/nagao-takashi_l.jpg"
+    },
+    "058": {
+      "id": "058",
+      "name": "鈴木 英敬",
+      "status": "",
+      "amount": 280,
+      "face_url": null
+    },
+    "061": {
+      "id": "061",
+      "name": "木村 次郎",
+      "status": "",
+      "amount": 236,
+      "face_url": null
+    },
+    "062": {
+      "id": "062",
+      "name": "塩谷 立",
+      "status": "",
+      "amount": 234,
+      "face_url": "https://www.jimin.jp/member/img/shionoya-ryu.jpg"
+    },
+    "063": {
+      "id": "063",
+      "name": "青山 周平",
+      "status": "",
+      "amount": 230,
+      "face_url": null
+    },
+    "064": {
+      "id": "064",
+      "name": "今村 洋史",
+      "status": "元職",
+      "amount": 220,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu48/candidate/img/members/imamura-hirofumi.jpg"
+    },
+    "066": {
+      "id": "066",
+      "name": "細田 博之",
+      "status": "故人",
+      "amount": 210,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu49/candidate/img/w/hosoda-hi_l.jpg"
+    },
+    "068": {
+      "id": "068",
+      "name": "稲田 朋美",
+      "status": "",
+      "amount": 196,
+      "face_url": null
+    },
+    "069": {
+      "id": "069",
+      "name": "谷川 とむ",
+      "status": "",
+      "amount": 188,
+      "face_url": null
+    },
+    "070": {
+      "id": "070",
+      "name": "佐々木 紀",
+      "status": "",
+      "amount": 184,
+      "face_url": null
+    },
+    "072": {
+      "id": "072",
+      "name": "井原 巧",
+      "status": "",
+      "amount": 168,
+      "face_url": null
+    },
+    "073": {
+      "id": "073",
+      "name": "宮内 秀樹",
+      "status": "",
+      "amount": 161,
+      "face_url": null
+    },
+    "075": {
+      "id": "075",
+      "name": "宮澤 博行",
+      "status": "",
+      "amount": 132,
+      "face_url": "https://www.jimin.jp/member/img/miyazawa-hiroyuki.jpg"
+    },
+    "078": {
+      "id": "078",
+      "name": "西村 康稔",
+      "status": "",
+      "amount": 100,
+      "face_url": null
+    },
+    "080": {
+      "id": "080",
+      "name": "福田 達夫",
+      "status": "",
+      "amount": 98,
+      "face_url": null
+    },
+    "081": {
+      "id": "081",
+      "name": "越智 隆雄",
+      "status": "",
+      "amount": 84,
+      "face_url": "https://www.jimin.jp/member/img/ochi-ta.jpg"
+    },
+    "083": {
+      "id": "083",
+      "name": "衛藤 晟一",
+      "status": "",
+      "amount": 80,
+      "face_url": "https://www.jimin.jp/member/img/etou-seiichi.jpg"
+    },
+    "084": {
+      "id": "084",
+      "name": "山田 美樹",
+      "status": "",
+      "amount": 76,
+      "face_url": null
+    },
+    "085": {
+      "id": "085",
+      "name": "小森 卓郎",
+      "status": "",
+      "amount": 70,
+      "face_url": null
+    },
+    "086": {
+      "id": "086",
+      "name": "田畑 裕明",
+      "status": "",
+      "amount": 68,
+      "face_url": null
+    },
+    "087": {
+      "id": "087",
+      "name": "鈴木 淳司",
+      "status": "",
+      "amount": 60,
+      "face_url": null
+    },
+    "089": {
+      "id": "089",
+      "name": "古田 圭一",
+      "status": "元職",
+      "amount": 42,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu48/candidate/img/members/furuta-ke.jpg"
+    },
+    "090": {
+      "id": "090",
+      "name": "加納 陽之助",
+      "status": "元職",
+      "amount": 40,
+      "face_url": null
+    },
+    "091": {
+      "id": "091",
+      "name": "岸 信夫",
+      "status": "元職",
+      "amount": 30,
+      "face_url": "https://www.jimin.jp/election/results/sen_shu49/candidate/img/w/kishi-no.jpg"
+    },
+    "092": {
+      "id": "092",
+      "name": "加藤 寛治",
+      "status": "元職",
+      "amount": 26,
+      "face_url": "https://prod-cdn.go2senkyo.com/uploads/seijika/image_file_name/73593/thumb_a1074b3f-d20a-4815-a35a-638a2a171af2.jpg"
+    },
+    "096": {
+      "id": "096",
+      "name": "藤原 崇",
+      "status": "",
+      "amount": 14,
+      "face_url": null
+    },
+    "097": {
+      "id": "097",
+      "name": "宮下 一郎",
+      "status": "",
+      "amount": 12,
+      "face_url": null
+    },
+    "098": {
+      "id": "098",
+      "name": "加藤 竜祥",
+      "status": "",
+      "amount": 10,
+      "face_url": null
+    }
+  },
+  "candidates": {
+    "27": "005",
+    "1685": "009",
+    "1214": "010",
+    "1039": "011",
+    "36528": "012",
+    "9539": "017",
+    "1096": "022",
+    "890": "023",
+    "1544": "024",
+    "1454": "025",
+    "46932": "026",
+    "985": "027",
+    "1170": "028",
+    "36498": "041",
+    "1311": "043",
+    "1368": "044",
+    "22": "045",
+    "22277": "046",
+    "3374": "048",
+    "5633": "049",
+    "819": "051",
+    "37054": "053",
+    "3714": "058",
+    "48589": "061",
+    "35838": "063",
+    "1733": "068",
+    "35919": "069",
+    "36599": "070",
+    "3782": "072",
+    "35942": "073",
+    "614": "078",
+    "36639": "080",
+    "36018": "084",
+    "52625": "085",
+    "30784": "086",
+    "1599": "087",
+    "52634": "090",
+    "36052": "096",
+    "1361": "097",
+    "52630": "098"
+  },
+  "blocks": {
+    "07": 5422,
+    "01": 2196,
+    "03": 2483,
+    "09": 1606,
+    "08": 1596,
+    "02": 1946,
+    "10": 1254,
+    "04": 1150,
+    "06": 544,
+    "05": 304,
+    "11": 80
+  },
+  "not_runs": {
+    "districts": {
+      "52201": [
+        "001"
+      ],
+      "52311": [
+        "002"
+      ],
+      "52263": [
+        "003"
+      ],
+      "52107": [
+        "004"
+      ],
+      "52050": [
+        "007"
+      ],
+      "52118": [
+        "013"
+      ],
+      "52075": [
+        "018",
+        "036"
+      ],
+      "52142": [
+        "020"
+      ],
+      "52177": [
+        "021"
+      ],
+      "52249": [
+        "030"
+      ],
+      "52181": [
+        "032"
+      ],
+      "52241": [
+        "056"
+      ],
+      "52198": [
+        "062"
+      ],
+      "52136": [
+        "064"
+      ],
+      "52267": [
+        "066"
+      ],
+      "52193": [
+        "075"
+      ],
+      "52127": [
+        "081"
+      ],
+      "52282": [
+        "091"
+      ],
+      "52310": [
+        "092"
+      ]
+    },
+    "blocks": {
+      "07": [
+        "001",
+        "062",
+        "075"
+      ],
+      "01": [
+        "007"
+      ],
+      "09": [
+        "014",
+        "089"
+      ],
+      "02": [
+        "018"
+      ],
+      "10": [
+        "019"
+      ],
+      "04": [
+        "034"
+      ],
+      "03": [
+        "038"
+      ],
+      "05": [
+        "064",
+        "081"
+      ],
+      "11": [
+        "083"
+      ]
+    }
+  }
+}

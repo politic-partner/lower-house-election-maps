@@ -1,144 +1,754 @@
-import React, { StrictMode, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-
-import { MapView } from '@deck.gl/core';
+import type { Color, MapViewState } from '@deck.gl/core';
+import { Layer, MapView } from '@deck.gl/core';
+import { CollisionFilterExtension, type CollisionFilterExtensionProps } from '@deck.gl/extensions';
 import { TileLayer } from '@deck.gl/geo-layers';
-import { BitmapLayer, PathLayer } from '@deck.gl/layers';
+import { BitmapLayer, GeoJsonLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import DeckGL from '@deck.gl/react';
+import type { Feature, Geometry } from 'geojson';
+import React, { StrictMode, useCallback, useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import blocks from './assets/blocks.json';
+import candidates from './assets/candidates.json';
+import cults from './assets/cults.json';
+import districts from './assets/districts.json';
+import kickbacks from './assets/kickbacks.json';
+import geojsonBlocks from './assets/layers/geojson_blocks.json';
+import geojsonDistricts from './assets/layers/geojson_districts.json';
+import iconBlockKickbacks from './assets/layers/icon_block_kickbacks.json';
+import iconDistrictKickbacks from './assets/layers/icon_district_kickbacks.json';
+import textBlockNames from './assets/layers/text_block_names.json';
+import textDistrictNames from './assets/layers/text_district_names.json';
+import parties from './assets/parties.json';
+import './index.css';
 
-import type { MapViewState, Position } from '@deck.gl/core';
-import type { TileLayerPickingInfo } from '@deck.gl/geo-layers';
-import { Layer, Viewport } from 'deck.gl';
+type PartyKey = keyof typeof parties;
+type Party = typeof parties[PartyKey];
+type CandidateKey = keyof typeof candidates;
+type Candidate = typeof candidates[CandidateKey];
+type BlockKey = keyof typeof blocks;
+type Block = typeof blocks[BlockKey];
+type BlockPartiesKey = keyof Block['parties'];
+type DistrictKey = keyof typeof districts;
+type KickbackDetailKey = keyof typeof kickbacks.details;
+type KickbackDetail = typeof kickbacks.details[KickbackDetailKey];
+type KickbackDistrictKey = keyof typeof kickbacks.not_runs.districts;
+type DistrictName = typeof textDistrictNames[number];
+type DistrictFeature = typeof geojsonDistricts.features[number];
+type DistrictProperties = DistrictFeature['properties'];
+type BlockName = typeof textBlockNames[number];
+type BlockFeature = typeof geojsonBlocks.features[number];
+type BlockProperties = BlockFeature['properties'];
+
+const BLOCK_COLORS: { [keyof: string]: { [keyof: string]: Color } } = {
+    "01": { "fillColor": [0x00, 0xd7, 0xd2, 0x1f], "borderColor": [0x00, 0xd7, 0xd2, 0xff], "backgroundColor": [Math.min(255, 128 + 0x00), Math.min(255, 128 + 0xd7), Math.min(255, 128 + 0xd2), 0x7f], "fontColor": [0x00 / 1.7, 0xd7 / 1.7, 0xd2 / 1.7, 0xff], },
+    "02": { "fillColor": [0x6a, 0xcf, 0x80, 0x1f], "borderColor": [0x6a, 0xcf, 0x80, 0xff], "backgroundColor": [Math.min(255, 128 + 0x6a), Math.min(255, 128 + 0xcf), Math.min(255, 128 + 0x80), 0x7f], "fontColor": [0x6a / 1.7, 0xcf / 1.7, 0x80 / 1.7, 0xff], },
+    "03": { "fillColor": [0xf9, 0xa4, 0x5c, 0x1f], "borderColor": [0xf9, 0xa4, 0x5c, 0xff], "backgroundColor": [Math.min(255, 128 + 0xf9), Math.min(255, 128 + 0xa4), Math.min(255, 128 + 0x5c), 0x7f], "fontColor": [0xf9 / 1.7, 0xa4 / 1.7, 0x5c / 1.7, 0xff], },
+    "04": { "fillColor": [0xf0, 0xac, 0xb7, 0x1f], "borderColor": [0xf0, 0xac, 0xb7, 0xff], "backgroundColor": [Math.min(255, 128 + 0xf0), Math.min(255, 128 + 0xac), Math.min(255, 128 + 0xb7), 0x7f], "fontColor": [0xf0 / 1.7, 0xac / 1.7, 0xb7 / 1.7, 0xff], },
+    "05": { "fillColor": [0xef, 0x62, 0x72, 0x1f], "borderColor": [0xef, 0x62, 0x72, 0xff], "backgroundColor": [Math.min(255, 128 + 0xef), Math.min(255, 128 + 0x62), Math.min(255, 128 + 0x72), 0x7f], "fontColor": [0xef / 1.7, 0x62 / 1.7, 0x72 / 1.7, 0xff], },
+    "06": { "fillColor": [0xf1, 0xcc, 0x71, 0x1f], "borderColor": [0xf1, 0xcc, 0x71, 0xff], "backgroundColor": [Math.min(255, 128 + 0xf1), Math.min(255, 128 + 0xcc), Math.min(255, 128 + 0x71), 0x7f], "fontColor": [0xf1 / 1.7, 0xcc / 1.7, 0x71 / 1.7, 0xff], },
+    "07": { "fillColor": [0xb7, 0xa4, 0xe1, 0x1f], "borderColor": [0xb7, 0xa4, 0xe1, 0xff], "backgroundColor": [Math.min(255, 128 + 0xb7), Math.min(255, 128 + 0xa4), Math.min(255, 128 + 0xe1), 0x7f], "fontColor": [0xb7 / 1.7, 0xa4 / 1.7, 0xe1 / 1.7, 0xff], },
+    "08": { "fillColor": [0x8a, 0x9f, 0xed, 0x1f], "borderColor": [0x8a, 0x9f, 0xed, 0xff], "backgroundColor": [Math.min(255, 128 + 0x8a), Math.min(255, 128 + 0x9f), Math.min(255, 128 + 0xed), 0x7f], "fontColor": [0x8a / 1.7, 0x9f / 1.7, 0xed / 1.7, 0xff], },
+    "09": { "fillColor": [0x7b, 0xc8, 0xfd, 0x1f], "borderColor": [0x7b, 0xc8, 0xfd, 0xff], "backgroundColor": [Math.min(255, 128 + 0x7b), Math.min(255, 128 + 0xc8), Math.min(255, 128 + 0xfd), 0x7f], "fontColor": [0x7b / 1.7, 0xc8 / 1.7, 0xfd / 1.7, 0xff], },
+    "10": { "fillColor": [0xae, 0xd9, 0x3a, 0x1f], "borderColor": [0xae, 0xd9, 0x3a, 0xff], "backgroundColor": [Math.min(255, 128 + 0xae), Math.min(255, 128 + 0xd9), Math.min(255, 128 + 0x3a), 0x7f], "fontColor": [0xae / 1.7, 0xd9 / 1.7, 0x3a / 1.7, 0xff], },
+    "11": { "fillColor": [0x3c, 0xc1, 0x6d, 0x1f], "borderColor": [0x3c, 0xc1, 0x6d, 0xff], "backgroundColor": [Math.min(255, 128 + 0x3c), Math.min(255, 128 + 0xc1), Math.min(255, 128 + 0x6d), 0x7f], "fontColor": [0x3c / 1.7, 0xc1 / 1.7, 0x6d / 1.7, 0xff], },
+};
+
+const isTouchDevice = 'ontouchstart' in window
+    || navigator.maxTouchPoints > 0
+    || window.matchMedia('(pointer: coarse)').matches;
+const SCREEN_ORIENTATION_TYPE = window.screen.orientation.type
+const ZOOM_LEVEL = SCREEN_ORIENTATION_TYPE.includes("landscape") ? 5 : 4;
 
 const INITIAL_VIEW_STATE: MapViewState = {
-    latitude: 36.2048,
-    longitude: 138.2529,
-    zoom: 5,
+    latitude: 38,
+    longitude: 136.8,
+    zoom: ZOOM_LEVEL,
     maxZoom: 16,
-    minZoom: 5,
+    minZoom: ZOOM_LEVEL,
     maxPitch: 45,
-    bearing: 0
+    pitch: 0,
+    bearing: 0,
+    transitionDuration: 500,
 };
 
-const COPYRIGHT_LICENSE_STYLE: React.CSSProperties = {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'hsla(0,0%,100%,.5)',
-    padding: '0 5px',
-    font: '12px/20px Helvetica Neue,Arial,Helvetica,sans-serif'
-};
+const PARTY_IDS = Object.keys(parties).filter((p) => parties[p as PartyKey].block_candidate_count > 0).sort((a, b) => parties[b as PartyKey].block_candidate_count - parties[a as PartyKey].block_candidate_count);
 
-const LINK_STYLE: React.CSSProperties = {
-    textDecoration: 'none',
-    color: 'rgba(0,0,0,.75)',
-    cursor: 'grab'
-};
+const zip = <T, U>(a: T[], b: U[]): [T | undefined, U | undefined][] => Array.from(Array(Math.max(b.length, a.length)), (_, i) => [a[i], b[i]]);
 
-/* global window */
+enum SheetSize {
+    Hidden,
+    Small,
+    Full,
+}
+function CandidateName({ name, kana }: { name: string, kana?: string }) {
+    const nameFragment = name.split(' ');
+    return zip(nameFragment, kana?.split(' ') ?? [...Array(nameFragment.length)].map(_ => "　")).map(
+        ([name, name_kana], index) => name_kana
+            ? <ruby key={`${name}${index}`}>{name}<rp>(</rp><rt>{name_kana}</rt><rp>)</rp></ruby>
+            : name
+    );
+}
+
+function PartyLabel({ party, disabled, className, children }: { party: Party, disabled: boolean, className: string, children?: React.ReactNode }) {
+    return <div
+        style={{ backgroundColor: party.color, opacity: disabled ? 1.0 : 0.2 }}
+        className={`text-white text-center font-bold text-xs font-medium me-2 px-2.5 py-0.5 rounded ${className}`}>
+        {party.name}
+        {children || <></>}
+    </div>
+}
+
+function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
+    const party = parties["1"];
+    return <div
+        className="w-full align-top flex p-2 bg-white-100 opacity-50 md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
+    >
+        <KickbackFace kickback={kickback} size={16} showScandal={false} />
+        <div className="flex flex-col px-2 leading-normal">
+            <h5 className="text-2xl font-bold tracking-tight text-gray-900">
+                <CandidateName name={kickback.name} />
+            </h5>
+            <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap gap-1">
+                    <span className="text-xs ">⌕</span>
+                    <a className="inline-flex items-center text-xs py-0.5 text-blue-600 hover:underline" href={`https://perplexity.ai/search?q=衆議院選挙 ${kickback.name} 不祥事 裏金 統一教会`} target="_blank" rel="noopener noreferrer">
+                        不祥事<span aria-hidden="true">→</span>
+                    </a>
+                    <a className="inline-flex items-center text-xs py-0.5 text-blue-600 hover:underline" href={`https://perplexity.ai/search?q=衆議院選挙 ${kickback.name} ニュース`} target="_blank" rel="noopener noreferrer">
+                        ニュース<span aria-hidden="true">→</span>
+                    </a>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                    <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
+                    <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">{kickback.status || '不出馬'}</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                    <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金<span className="text-xs">{kickback.amount}</span>万円</span>
+                </div>
+            </div>
+        </div>
+    </div>;
+}
+
+function NewsLink({ href, children }: { href: string, children: React.ReactNode }) {
+    return <a
+        className="text-blue-600 hover:underline text-xs py-0.5 inline-flex items-center justify-center"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+    >
+        {children}<span aria-hidden="true">→</span>
+    </a>;
+}
+
+function CandidateCard({ candidate }: { candidate: Candidate }) {
+    const party = parties[candidate.pid as PartyKey];
+    const kickbackId = kickbacks.candidates[candidate.id as keyof typeof kickbacks.candidates];
+    const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
+    const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
+
+    return <div
+        className="w-full align-top flex p-2 bg-white md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
+    >
+        <CandidateFace candidate={candidate} size={16} showScandal={false} />
+        <div className="flex flex-col px-2 leading-normal">
+            <h5 className="text-2xl font-bold tracking-tight text-gray-900">
+                <CandidateName name={candidate.name} kana={candidate.name_kana} />
+                <span className="text-sm ml-1">({candidate.age}歳)</span>
+            </h5>
+            <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap gap-1">
+                    <span className="text-xs ">⌕</span>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${candidate.name} 不祥事 裏金 統一教会`}>不祥事</NewsLink>
+                    <NewsLink href={`https://perplexity.ai/search?q=衆議院選挙 ${candidate.name} ニュース`}>ニュース</NewsLink>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                    <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
+                    <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">{candidate.status}{candidate.win_count === 0 ? <></> : <span> 当選{candidate.win_count}回</span>}</span>
+                    {candidate.endorser && <span className="bg-blue-100 text-blue-800 text-xs  px-2.5 py-0.5 rounded">{candidate.endorser}</span>}
+                    {candidate.supporter && <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">{candidate.supporter}</span>}
+                    {kickback && <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金<span className="text-xs">{kickback.amount}</span>万円</span>}
+                    {cult && <span className="bg-gray-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">カルト度{cult.point}</span>}
+                    {cult && cult.links.map((link, index) => <span key={index} className="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">{link}</span>)}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                    {candidate.titles.map((title, index) => <span key={index} className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">{title}</span>)}
+                </div>
+            </div>
+        </div>
+    </div>;
+}
+
+function KickbackFace({ kickback, size, showScandal }: { kickback: KickbackDetail, size: number, showScandal: boolean }) {
+    return <div className="relative flex flex-col items-center overflow-visible">
+        <div
+            style={{ borderColor: parties["1" as PartyKey].color, opacity: showScandal ? 0.5 : 1.0 }}
+            className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
+        >
+            <img className="w-full h-full object-cover" src={kickback.face_url!} />
+        </div>
+        {showScandal && <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
+            裏金<span className="text-xs">{kickback.amount}</span>万円
+        </span>}
+    </div>;
+}
+
+function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate, size: number, showScandal: boolean }) {
+    const party = parties[candidate.pid as PartyKey];
+    let warning = null;
+
+    if (showScandal) {
+        const kickbackId = kickbacks.candidates[candidate.id as keyof typeof kickbacks.candidates];
+        const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
+
+        if (kickback) {
+            warning = <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
+                裏金 <span className="text-xs" > {kickback.amount}</span > 万円
+            </span >;
+        } else {
+            const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
+            if (cult) {
+                warning = <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-yellow-500 rounded-full">
+                    {cult.links[0]}
+                </span >;
+            }
+        }
+    }
+
+    return <div className={`${showScandal ? 'relative' : ''} flex flex-col items-center overflow-visible`}>
+        <div
+            style={{ borderColor: party.color }}
+            className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
+        >
+            <img className="w-full h-full object-cover" src={`https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/photo/${candidate.face_image}`} />
+        </div>
+        {warning && <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
+            {warning}
+        </span>}
+    </div>
+}
+
+function CandidateSmall({ candidateId }: { candidateId: CandidateKey }) {
+    const candidate = candidates[candidateId];
+    return <div key={candidateId} className="flex-none p-3">
+        <div className="w-16 h-16 flex flex-col items-center justify-center overflow-visible">
+            <CandidateFace candidate={candidate} size={16} showScandal={true} />
+            <span className="text-slate-900 text-xs font-bold"><CandidateName name={candidate.name} kana={candidate.name_kana} /></span>
+        </div>
+    </div>
+}
+
+function NotRunSmall({ kickbackId }: { kickbackId: KickbackDetailKey }) {
+    const kickback = kickbacks.details[kickbackId];
+    return <div className="flex-none p-3">
+        <div className="w-16 h-16 flex flex-col items-center justify-center overflow-visible">
+            <KickbackFace kickback={kickback} size={16} showScandal={true} />
+            <span className="text-slate-900 text-xs font-bold"><CandidateName name={kickback.name} /></span>
+        </div>
+    </div>
+}
+
+function SheetSmall({ setSheetSize, children }: { setSheetSize: (size: SheetSize) => void, children: React.ReactNode }) {
+    const [startY, setStartY] = useState(0);
+    const [isSlidingDown, setIsSlidingDown] = useState(false);
+
+    const handleTouchEnd = () => {
+        if (isSlidingDown) {
+            setSheetSize(SheetSize.Full);
+        }
+        setIsSlidingDown(false);
+    };
+
+    return <div
+        onTouchStart={e => setStartY(e.touches[0].clientY)}
+        onTouchMove={e => (e.touches[0].clientY < startY - 50) && setIsSlidingDown(true)}
+        onTouchEnd={handleTouchEnd}
+    >
+        {children}
+    </div>;
+}
+
+function DistrictSmall({ districtId, setSheetSize }: { districtId: DistrictKey, setSheetSize: (size: SheetSize) => void }) {
+    const district = districts[districtId];
+    return <SheetSmall setSheetSize={setSheetSize}>
+        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
+        <div className="overflow-x-scroll flex">
+            {districts[districtId].cids.map((cid) => <CandidateSmall key={cid} candidateId={cid as CandidateKey} />)}
+            {kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => <NotRunSmall key={kid} kickbackId={kid as KickbackDetailKey} />)}
+        </div>
+    </SheetSmall>
+}
+
+
+function BlockSmall({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize: (size: SheetSize) => void }) {
+    const block = blocks[blockId];
+    const blockParties = block.parties;
+    return <SheetSmall setSheetSize={setSheetSize}>
+        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+        <div className="overflow-x-scroll flex">
+            {PARTY_IDS.map((pid) => <div key={pid} className="flex-none px-0 pb-4 first:pl-4 last:pr-4">
+                <PartyLabel party={parties[pid as PartyKey]} disabled={pid in blockParties} className="w-[4.5rem]"> {blockParties[pid as BlockPartiesKey]?.length || "0"}</PartyLabel>
+            </div>)}
+        </div>
+    </SheetSmall>;
+}
+
+
+function SheetFull({ setSheetSize, children }: { setSheetSize: (size: SheetSize) => void, children: React.ReactNode }) {
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setSheetSize(SheetSize.Small);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+
+    return <div className="relative h-full overflow-y-scroll"    >
+        {children}
+    </div>;
+}
+
+function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, setSheetSize: (size: SheetSize) => void }) {
+    const district = districts[districtId];
+    const block = blocks[district.bid as BlockKey];
+    const districtKickbacks = kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => kickbacks.details[kid as KickbackDetailKey]);
+    return <SheetFull setSheetSize={setSheetSize}>
+        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
+        <button
+            type="button"
+            className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+            onClick={() => setSheetSize(SheetSize.Small)}
+        >
+            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+        </button>
+        <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
+            {district.cids.map((cid) => <CandidateCard key={cid} candidate={candidates[cid as CandidateKey]} />)}
+            {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} />)}
+        </div>
+        <hr className="my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+    </SheetFull>;
+}
+
+
+function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize: (size: SheetSize) => void }) {
+    const block = blocks[blockId];
+    const blockParties = block.parties;
+    return <SheetFull setSheetSize={setSheetSize}>
+        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+        <button
+            type="button"
+            className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+            onClick={() => setSheetSize(SheetSize.Small)}
+        >
+            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+        </button>
+        <div className="overflow-x-scroll flex">
+            {PARTY_IDS.map((pid) => <div key={pid} className="flex-none px-0 pb-4 first:pl-4 last:pr-4">
+                <PartyLabel party={parties[pid as PartyKey]} disabled={pid in blockParties} className="w-[4.5rem]"> {blockParties[pid as BlockPartiesKey]?.length || "0"}</PartyLabel>
+            </div>)}
+        </div>
+        <div className="w-full h-full justify-center place-content-center">
+            <h2 className="text-4xl text-center font-bold text-gray-900 tracking-tight">🚧 作成中 🚧</h2>
+        </div>
+    </SheetFull>;
+}
+
+function Sheet({ size, smallHeight, isBlockScale, children }: { size: SheetSize, smallHeight: string, isBlockScale: boolean, children: React.ReactNode }) {
+    const visible = size === SheetSize.Full ? 'h-svh' : ((size === SheetSize.Small && isBlockScale) ? smallHeight : 'h-0');
+    const bgClass = size === SheetSize.Full ? 'bg-white' : 'bg-white/[.6]';
+    return (
+        <div className={`${visible} fixed w-svw bottom-0 px-0 mx-0 transition-height overflow-hidden duration-300 ease-in-out`}>
+            <div className={`${size !== SheetSize.Full ? 'bottomSheetKnob rounded-t-xl' : ''} h-full min-w-96 md:max-w-svw py-4 border border-gray-200 shadow transition-colors duration-300 ease-in-out ${bgClass}`}>
+                {children}
+            </div>
+        </div>
+    );
+}
+
+function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boolean, setShowAboutPanel: (show: boolean) => void }) {
+    if (!showAboutPanel) {
+        return <></>;
+    }
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setShowAboutPanel(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    return (
+        <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 z-10 w-screen">
+                <div className="flex items-end justify-center text-center">
+                    <div className="h-dvh w-full overflow-y-scroll bg-white text-left">
+                        <div className="relative bg-white px-4 pt-5">
+                            <h1 className="sticky top-0 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選チェックマップ2024</h1>
+                            <button
+                                type="button"
+                                className="fixed top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                onClick={() => setShowAboutPanel(false)}
+                            >
+                                <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                </svg>
+                            </button>
+
+                            <h3 className="mt-2 text-3xl font-semibold text-gray-900">データ引用元</h3>
+                            <p className="my-4">
+                                <ul className="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://www.nhk.or.jp/senkyo/database/shugiin/">衆議院選挙2024特設サイト | NHK
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html">行政区域データ: データ基準年 2024年（令和6年）版 | 国土数値情報ダウンロードサイト
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル一覧 | 国土地理院
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://qiita.com/uedayou/items/806ed80a45ec9855c554">住所LODから行政区画のGeoJSONファイルを作成する方法 | Qiita
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://github.com/smartnews-smri/japan-topography">市区町村・選挙区 地形データ | GitHub
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://clearing-house.org/?p=6069">政治資金パーティー収入　裏金はおいくらでしたか？（裏金国会議員一覧） | 情報公開クリアリングハウス
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://news.ntv.co.jp/pages/uragane">【一覧】自民党国会議員の"裏金"リスト 88人 | 日テレNEWS
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="http://dailycult.blogspot.com/2021/10/2021.html">【衆院選2021】総力特集・カルト候補ぜんぶ載せ！ | やや日刊カルト新聞
+                                    </a></li>
+                                </ul>
+                            </p>
+
+                            <h3 className="mt-2 text-3xl font-semibold text-gray-900">利用サービス</h3>
+                            <p className="my-4">
+                                <ul className="space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://github.com">GitHub
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://docs.github.com/ja/pages/getting-started-with-github-pages/about-github-pages">GitHub Pages | GitHub
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="https://www.perplexity.ai/">Perplexity AI
+                                    </a></li>
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
 
-function getTooltip(info: TileLayerPickingInfo & { color: Uint8Array | null; layer: Layer<{}> | null; sourceLayer?: Layer<{}> | null; viewport?: Viewport; index: number; x: number; y: number; z: number; pixelRatio: number; sourceTile: any; sourceTileSubLayer: Layer<{}> }) {
-    const { tile } = info;
-    if (tile) {
-        const { x, y, z } = tile.index;
-        return `tile: x: ${x}, y: ${y}, z: ${z}`;
+export default function App({ }: {}) {
+    const fontSize = 32;
+
+    const [showAboutPanel, setShowAboutPanel] = useState(false);
+    const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
+    const [blockId, setBlockId] = useState<BlockKey | null>(null);
+    const [blockSheetSize, setBlockSheetSize] = useState<SheetSize>(SheetSize.Hidden);
+    const [districtId, setDistrictId] = useState<DistrictKey | null>(null);
+    const [districtSheetSize, setDistrictSheetSize] = useState<SheetSize>(SheetSize.Hidden);
+
+    const onViewStateChange = useCallback(({ viewState }: { viewState: MapViewState }) => {
+        setViewState(viewState);
+    }, []);
+
+    // const getUserLocation = () => {
+    //     if (!navigator.geolocation) {
+    //         console.error('Geolocation is not supported by this browser.');
+    //     }
+    //     navigator.geolocation.getCurrentPosition(
+    //         (position) => {
+    //             const newViewState = { ...viewState, "longitude": position.coords.longitude, "latitude": position.coords.latitude, "zoom": 8, transitionDuration: 500, }
+    //             setViewState(newViewState);
+
+    //         },
+    //         (error) => {
+    //             console.error('Error getting user location:', error);
+    //         }
+    //     );
+    // };
+
+    const zoom = viewState.zoom;
+    const scale = 2 ** zoom;
+    const sizeMaxPixels = (scale / 3) * fontSize;
+    const sizeMinPixels = Math.min(scale / 1000, 0.5) * fontSize;
+    const districtLineWidth = Math.min(1.2 ** (zoom - 5), 4);
+    const isBlockScale = zoom < 6;
+
+    const layers: Layer[] = [];
+    if (zoom >= 11) {
+        layers.push(
+            new TileLayer<ImageBitmap>({
+                id: 'tile-pale',
+                data: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
+                maxRequests: 20,
+                pickable: false,
+                minZoom: 0,
+                maxZoom: 19,
+                tileSize: 256,
+                zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+                renderSubLayers: props => {
+                    const [[west, south], [east, north]] = props.tile.boundingBox;
+                    const { data, ...otherProps } = props;
+
+                    return [
+                        new BitmapLayer(otherProps, {
+                            image: data,
+                            bounds: [west, south, east, north]
+                        })
+                    ];
+                },
+            })
+        );
     }
-    return null;
-}
 
-export default function App({
-    showBorder = false,
-    onTilesLoad
-}: {
-    showBorder?: boolean;
-    onTilesLoad?: () => void;
-}) {
-    const tileLayer = new TileLayer<ImageBitmap>({
-        // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-        // data: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-        data: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
-        // data: ['http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'],
+    layers.push(
+        new GeoJsonLayer({
+            id: 'geojson-districts',
+            data: geojsonDistricts as unknown as Feature<Geometry, DistrictProperties>[],
+            visible: zoom >= 6,
+            stroked: true,
+            filled: true,
+            pickable: true,
+            getFillColor: (f: Feature<Geometry, DistrictProperties>) => BLOCK_COLORS[f.properties.bid].fillColor,
+            getLineColor: (f: Feature<Geometry, DistrictProperties>) => BLOCK_COLORS[f.properties.bid].borderColor,
+            getLineWidth: (f: Feature<Geometry, DistrictProperties>) => (districtId === f.properties.did) ? districtLineWidth * 2 : districtLineWidth,
+            lineWidthUnits: 'pixels',
+            onHover: ({ object }) => {
+                if (object) {
+                    setDistrictId(object.properties.did as DistrictKey);
+                    setDistrictSheetSize(SheetSize.Small);
+                    setBlockId(object.properties.bid as BlockKey);
+                    setBlockSheetSize(SheetSize.Small);
+                } else {
+                    setDistrictSheetSize(SheetSize.Hidden);
+                    setBlockSheetSize(SheetSize.Hidden);
+                }
+            },
+            onClick: ({ object }) => {
+                if (isTouchDevice) {
+                    return;
+                };
+                setDistrictId(object?.properties.did as DistrictKey);
+                setDistrictSheetSize(SheetSize.Full);
+                setBlockId(object?.properties.bid as BlockKey);
+                setBlockSheetSize(SheetSize.Hidden);
+            },
+            onTouchStart: ({ object }: { object: Feature<Geometry, DistrictProperties> | null }) => {
+                setDistrictId(object?.properties.did as DistrictKey);
+                setDistrictSheetSize(SheetSize.Full);
+                setBlockId(object?.properties.bid as BlockKey);
+                setBlockSheetSize(SheetSize.Hidden);
+            },
+            updateTriggers: {
+                getLineWidth: [districtId, districtLineWidth]
+            },
+        })
+    );
+    layers.push(
+        new GeoJsonLayer({
+            id: 'geojson-blocks',
+            data: geojsonBlocks as unknown as Feature<Geometry, BlockProperties>[],
+            visible: zoom < 6,
+            stroked: true,
+            filled: true,
+            pickable: true,
+            getFillColor: (f: Feature<Geometry, BlockProperties>) => BLOCK_COLORS[f.properties.bid].fillColor,
+            getLineColor: (f: Feature<Geometry, BlockProperties>) => BLOCK_COLORS[f.properties.bid].borderColor,
+            getLineWidth: (f: Feature<Geometry, BlockProperties>) => (blockId === f.properties.bid) ? districtLineWidth * 2 : districtLineWidth,
+            lineWidthUnits: 'pixels',
+            onHover: ({ object }) => {
+                if (object) {
+                    setBlockId(object.properties.bid as BlockKey);
+                    setBlockSheetSize(SheetSize.Small);
+                } else {
+                    setBlockSheetSize(SheetSize.Hidden);
+                }
+            },
+            onClick: ({ object }) => {
+                if (isTouchDevice) {
+                    return;
+                };
+                setDistrictSheetSize(SheetSize.Hidden);
+                setBlockId(object?.properties.bid as BlockKey);
+                setBlockSheetSize(SheetSize.Full);
+            },
+            onTouchStart: ({ object }: { object: Feature<Geometry, DistrictProperties> | null }) => {
+                setDistrictSheetSize(SheetSize.Hidden);
+                setBlockId(object?.properties.bid as BlockKey);
+                setBlockSheetSize(SheetSize.Full);
+            },
+            updateTriggers: {
+                getLineWidth: [blockId, districtLineWidth]
+            },
+        })
+    );
 
-        // Since these OSM tiles support HTTP/2, we can make many concurrent requests
-        // and we aren't limited by the browser to a certain number per domain.
-        maxRequests: 20,
+    layers.push(
+        new TextLayer<DistrictName, CollisionFilterExtensionProps<DistrictName>>({
+            id: 'text-district-names',
+            data: textDistrictNames,
+            billboard: true,
+            visible: zoom >= 7,
+            characterSet: 'auto',
+            fontSettings: { buffer: 8 },
 
-        pickable: true,
-        onViewportLoad: onTilesLoad,
-        autoHighlight: showBorder,
-        highlightColor: [60, 60, 60, 40],
-        // https://wiki.openstreetmap.org/wiki/Zoom_levels
-        minZoom: 0,
-        maxZoom: 19,
-        tileSize: 256,
-        zoomOffset: devicePixelRatio === 1 ? -1 : 0,
-        renderSubLayers: props => {
-            const [[west, south], [east, north]] = props.tile.boundingBox;
-            const { data, ...otherProps } = props;
+            // TextLayer options
+            getText: d => districts[d.d as keyof typeof districts].name,
+            getPosition: d => [d.p[0], d.p[1], 200],
+            getColor: d => BLOCK_COLORS[d.b].fontColor,
+            getSize: d => Math.pow(d.a, 0.25),
+            sizeScale: fontSize,
+            sizeMaxPixels,
+            sizeMinPixels,
+            background: true,
+            getBackgroundColor: d => BLOCK_COLORS[d.b].backgroundColor,
+            maxWidth: 64 * 12,
 
-            return [
-                new BitmapLayer(otherProps, {
-                    image: data,
-                    bounds: [west, south, east, north]
-                }),
-                showBorder &&
-                new PathLayer<Position[]>({
-                    id: `${props.id}-border`,
-                    data: [
-                        [
-                            [west, north],
-                            [west, south],
-                            [east, south],
-                            [east, north],
-                            [west, north]
-                        ]
-                    ],
-                    getPath: d => d,
-                    getColor: [255, 0, 0],
-                    widthMinPixels: 4
-                })
-            ];
-        }
-    });
+            // CollideExtension options
+            collisionEnabled: true,
+            getCollisionPriority: d => Math.log10(d.a),
+            collisionTestProps: {
+                sizeScale: 32 * 2,
+                sizeMaxPixels: sizeMaxPixels * 2,
+                sizeMinPixels: sizeMinPixels * 2
+            },
+            extensions: [new CollisionFilterExtension()]
+        })
+    );
+
+
+    layers.push(
+        new IconLayer({
+            id: 'icon-district-kickbacks',
+            data: iconDistrictKickbacks,
+            billboard: true,
+            iconAtlas: 'money_emoji.png',
+            iconMapping: {
+                marker: {
+                    x: 0, y: 0,
+                    width: 256, height: 256,
+                }
+            },
+            getPixelOffset: [0, Math.max(sizeMinPixels, zoom - 3)],
+            getSize: d => (8 + Math.pow(d.a, 0.4)) * Math.max(0, Math.log(zoom - 4)),
+            getIcon: _ => 'marker',
+            getPosition: d => [d.p[0], d.p[1], 200],
+            updateTriggers: {
+                getPixelOffset: [zoom],
+                getSize: [zoom],
+            },
+        })
+    );
+
+    layers.push(
+        new TextLayer<BlockName, CollisionFilterExtensionProps<BlockName>>({
+            id: 'text-block-names',
+            data: textBlockNames,
+            visible: zoom < 7,
+            characterSet: 'auto',
+            fontSettings: {
+                buffer: 8
+            },
+
+            // TextLayer options
+            getText: d => blocks[d.b as keyof typeof blocks].name,
+            getPosition: d => [d.p[0], d.p[1], d.a * 2000],
+            getColor: d => BLOCK_COLORS[d.b].fontColor,
+            getSize: d => Math.pow(d.a, 0.25),
+            sizeScale: fontSize,
+            sizeMaxPixels,
+            sizeMinPixels,
+            maxWidth: 64 * 12,
+
+            // CollideExtension options
+            collisionEnabled: true,
+            getCollisionPriority: d => Math.log10(d.a),
+            collisionTestProps: {
+                sizeScale: 32 * 2,
+                sizeMaxPixels: sizeMaxPixels * 2,
+                sizeMinPixels: sizeMinPixels * 2
+            },
+            extensions: [new CollisionFilterExtension()]
+        })
+    );
+
+    layers.push(
+        new IconLayer({
+            id: 'icon-block-kickbacks',
+            data: iconBlockKickbacks,
+            visible: zoom < 7,
+            iconAtlas: 'money_emoji.png',
+            iconMapping: {
+                marker: {
+                    x: 0, y: 0,
+                    width: 256, height: 256,
+                }
+            },
+            getSize: d => 8 + Math.pow(d.a, 0.4),
+            getIcon: _ => 'marker',
+            getPosition: d => [d.p[0], d.p[1], 200],
+            getPixelOffset: [0, 20],
+        })
+    );
 
     return (
-        <DeckGL
-            layers={[tileLayer]}
-            views={new MapView({ repeat: true })}
-            initialViewState={INITIAL_VIEW_STATE}
-            controller={true}
-        // getTooltip={getTooltip}
-        >
-            <div style={COPYRIGHT_LICENSE_STYLE}>
-                {'© '}
-                <a style={LINK_STYLE} href="https://maps.gsi.go.jp/development/ichiran.html" target="blank">
-                    国土地理院
-                </a>
-            </div>
-        </DeckGL>
+        <div id="app" className="overscroll-none w-svw h-svh flex">
+            <main>
+                <DeckGL
+                    layers={layers}
+                    views={new MapView()}
+                    viewState={viewState}
+                    controller={{ doubleClickZoom: true }}
+                    onViewStateChange={onViewStateChange}
+                />
+                <div
+                    className="absolute top-0 right-0 p-4 opacity-50 cursor-pointer"
+                    onClick={() => setShowAboutPanel(true)}
+                >
+                    <h2 className="text-md font-bold text-gray-900 tracking-tight">衆院選チェックマップ2024</h2>
+                </div>
+                <Sheet size={districtSheetSize} smallHeight="h-40" isBlockScale={!isBlockScale}>
+                    {districtId && (districtSheetSize === SheetSize.Full
+                        ? <DistrictFull districtId={districtId} setSheetSize={setDistrictSheetSize} />
+                        : <DistrictSmall districtId={districtId} setSheetSize={setDistrictSheetSize} />
+                    )}
+                </Sheet>
+                <Sheet size={blockSheetSize} smallHeight="h-20" isBlockScale={isBlockScale}>
+                    {blockId && (blockSheetSize === SheetSize.Full
+                        ? <BlockFull blockId={blockId} setSheetSize={setBlockSheetSize} />
+                        : <BlockSmall blockId={blockId} setSheetSize={setBlockSheetSize} />
+                    )}
+                </Sheet>
+            </main>
+            <AboutPanel showAboutPanel={showAboutPanel} setShowAboutPanel={setShowAboutPanel} />
+        </div>
     );
 }
 
-function InfoPanel({ title, children, sourceLink }) {
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    return (
-        <PanelContainer>
-            <PanelTitle onClick={() => setIsExpanded(!isExpanded)}>
-                <div>{title}</div>
-                <PanelExpander $expanded={isExpanded}>{isExpanded ? '✕' : 'i'}</PanelExpander>
-            </PanelTitle>
-            <PanelContent $expanded={isExpanded}>{children}</PanelContent>
-            <SourceLink $expanded={isExpanded} href={sourceLink} target="_new">
-                View Code ↗
-            </SourceLink>
-        </PanelContainer>
-    );
-}
-
-createRoot(document.getElementById('root')!).render(
+const ROOT = createRoot(document.getElementById('root')!);
+ROOT.render(
     <StrictMode>
         <App />
-    </StrictMode>,
+    </StrictMode>
 )

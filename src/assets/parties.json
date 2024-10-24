@@ -1,0 +1,146 @@
+{
+  "1": {
+    "id": "1",
+    "name": "自民",
+    "name_full": "自由民主党",
+    "ruling": true,
+    "color": "#d22319",
+    "block_candidate_count": 285
+  },
+  "195": {
+    "id": "195",
+    "name": "立民",
+    "name_full": "立憲民主党",
+    "ruling": false,
+    "color": "#2391ff",
+    "block_candidate_count": 234
+  },
+  "187": {
+    "id": "187",
+    "name": "維新",
+    "name_full": "日本維新の会",
+    "ruling": false,
+    "color": "#e19a00",
+    "block_candidate_count": 146
+  },
+  "3": {
+    "id": "3",
+    "name": "公明",
+    "name_full": "公明党",
+    "ruling": true,
+    "color": "#eb61be",
+    "block_candidate_count": 39
+  },
+  "4": {
+    "id": "4",
+    "name": "共産",
+    "name_full": "日本共産党",
+    "ruling": false,
+    "color": "#6e41e1",
+    "block_candidate_count": 35
+  },
+  "197": {
+    "id": "197",
+    "name": "国民",
+    "name_full": "国民民主党",
+    "ruling": false,
+    "color": "#0010a5",
+    "block_candidate_count": 42
+  },
+  "212": {
+    "id": "212",
+    "name": "れいわ",
+    "name_full": "れいわ新選組",
+    "ruling": false,
+    "color": "#f0a0a7",
+    "block_candidate_count": 32
+  },
+  "5": {
+    "id": "5",
+    "name": "社民",
+    "name_full": "社会民主党",
+    "ruling": false,
+    "color": "#05555a",
+    "block_candidate_count": 17
+  },
+  "227": {
+    "id": "227",
+    "name": "参政",
+    "name_full": "参政党",
+    "ruling": false,
+    "color": "#eb640a",
+    "block_candidate_count": 22
+  },
+  "243": {
+    "id": "243",
+    "name": "みんな",
+    "name_full": "みんなでつくる党",
+    "ruling": false,
+    "color": "#b6c81b",
+    "block_candidate_count": 1
+  },
+  "245": {
+    "id": "245",
+    "name": "保守",
+    "name_full": "日本保守党",
+    "ruling": false,
+    "color": "#9696f0",
+    "block_candidate_count": 26
+  },
+  "214": {
+    "id": "214",
+    "name": "安死",
+    "name_full": "安楽死制度を考える会",
+    "ruling": false,
+    "color": "#000546",
+    "block_candidate_count": 2
+  },
+  "14": {
+    "id": "14",
+    "name": "社大",
+    "name_full": "沖縄社会大衆党",
+    "ruling": false,
+    "color": "#1991aa",
+    "block_candidate_count": 0
+  },
+  "189": {
+    "id": "189",
+    "name": "都民",
+    "name_full": "都民ファーストの会",
+    "ruling": false,
+    "color": "#666666",
+    "block_candidate_count": 0
+  },
+  "93": {
+    "id": "93",
+    "name": "減税",
+    "name_full": "減税日本",
+    "ruling": false,
+    "color": "#28c3dc",
+    "block_candidate_count": 0
+  },
+  "144": {
+    "id": "144",
+    "name": "大地",
+    "name_full": "新党大地",
+    "ruling": false,
+    "color": "#4baa62",
+    "block_candidate_count": 0
+  },
+  "29": {
+    "id": "29",
+    "name": "諸派",
+    "name_full": "諸派",
+    "ruling": false,
+    "color": "#690064",
+    "block_candidate_count": 0
+  },
+  "-1": {
+    "id": "-1",
+    "name": "無",
+    "name_full": "無所属",
+    "ruling": false,
+    "color": "#4c6a88",
+    "block_candidate_count": 0
+  }
+}
