@@ -103,7 +103,7 @@ function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
     return <div
         className="w-full align-top flex p-2 bg-white-100 opacity-50 md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
     >
-        <KickbackFace kickback={kickback} size={16} showScandal={false} />
+        <KickbackFace kickback={kickback} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">
                 <CandidateName name={kickback.name} />
@@ -150,7 +150,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
     return <div
         className="w-full align-top flex p-2 bg-white md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
     >
-        <CandidateFace candidate={candidate} size={16} showScandal={false} />
+        <CandidateFace candidate={candidate} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">
                 <CandidateName name={candidate.name} kana={candidate.name_kana} />
@@ -180,7 +180,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
 }
 
 function KickbackFace({ kickback, size, showScandal }: { kickback: KickbackDetail, size: number, showScandal: boolean }) {
-    return <div className="relative flex flex-col items-center overflow-visible">
+    return <div className={`h-${size} relative flex flex-col items-center overflow-visible`}>
         <div
             style={{ borderColor: parties["1" as PartyKey].color, opacity: showScandal ? 0.5 : 1.0 }}
             className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
@@ -215,7 +215,7 @@ function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate,
         }
     }
 
-    return <div className={`${showScandal ? 'relative' : ''} flex flex-col items-center overflow-visible`}>
+    return <div className={`h-${size} ${showScandal ? 'relative' : ''} flex flex-col items-center overflow-visible`}>
         <div
             style={{ borderColor: party.color }}
             className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
@@ -393,7 +393,7 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
                 <div className="flex items-end justify-center text-center">
                     <div className="h-dvh w-full overflow-y-scroll bg-white text-left">
                         <div className="relative bg-white px-4 pt-5">
-                            <h1 className="sticky top-0 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選チェックマップ2024</h1>
+                            <h1 className="sticky top-0 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選2024候補者マップ</h1>
                             <button
                                 type="button"
                                 className="fixed top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
@@ -726,7 +726,7 @@ export default function App({ }: {}) {
                     className="absolute top-0 right-0 p-4 opacity-50 cursor-pointer"
                     onClick={() => setShowAboutPanel(true)}
                 >
-                    <h2 className="text-md font-bold text-gray-900 tracking-tight">衆院選チェックマップ2024</h2>
+                    <h2 className="text-md font-bold text-gray-900 tracking-tight">衆院選2024候補者マップ</h2>
                 </div>
                 <Sheet size={districtSheetSize} smallHeight="h-40" isBlockScale={!isBlockScale}>
                     {districtId && (districtSheetSize === SheetSize.Full
