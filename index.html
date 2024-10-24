@@ -1,15 +1,41 @@
 <!doctype html>
 <html lang="ja" class="overscroll-none">
+
 <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-F34HVG3XT2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-F34HVG3XT2');
+  </script>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="money_emoji.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <title>衆院選2024候補者マップ</title>
+  <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "衆院選2024候補者マップ",
+        "operatingSystem": "Web",
+        "applicationCategory": "MapApplication",
+        "description": "衆議院選挙2024の候補者情報を閲覧できるマップです。",
+        "url": "https://politic-partner.github.io/lower-house-election-maps/",
+        "author": {
+            "@type": "Person",
+            "name": "Politic 🫶 Partner"
+        }
+    }
+    </script>
 </head>
+
 <body>
   <div id="root"></div>
   <script type="module" src="src/map.tsx"></script>
 </body>
+
 </html>
