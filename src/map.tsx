@@ -57,7 +57,7 @@ const BLOCK_COLORS: { [keyof: string]: { [keyof: string]: Color } } = {
 const isTouchDevice = 'ontouchstart' in window
     || navigator.maxTouchPoints > 0
     || window.matchMedia('(pointer: coarse)').matches;
-const SCREEN_ORIENTATION_TYPE = window.screen.orientation.type
+const SCREEN_ORIENTATION_TYPE = window.screen.orientation?.type || 'portrait-primary';
 const ZOOM_LEVEL = SCREEN_ORIENTATION_TYPE.includes("landscape") ? 5 : 4;
 
 const INITIAL_VIEW_STATE: MapViewState = {
