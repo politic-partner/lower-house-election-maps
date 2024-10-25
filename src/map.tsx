@@ -167,7 +167,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
                     {candidate.endorser && <span className="bg-blue-100 text-blue-800 text-xs  px-2.5 py-0.5 rounded">{candidate.endorser}推薦</span>}
                     {candidate.supporter && <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">{candidate.supporter}支持</span>}
                     {kickback && <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金<span className="text-xs">{kickback.amount}</span>万円</span>}
-                    {cult && <span className="bg-gray-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">カルト度{cult.point}</span>}
+                    {cult && cult.point && <span className="bg-gray-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">カルト度{cult.point}</span>}
                     {cult && cult.links.map((link, index) => <span key={index} className="bg-yellow-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">{link}</span>)}
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -427,13 +427,16 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
                                         href="https://github.com/smartnews-smri/japan-topography">市区町村・選挙区 地形データ | GitHub
                                     </a></li>
                                     <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
+                                        href="http://dailycult.blogspot.com/2021/10/2021.html">【衆院選2021】総力特集・カルト候補ぜんぶ載せ！ | やや日刊カルト新聞
+                                    </a></li>
+                                    <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
                                         href="https://clearing-house.org/?p=6069">政治資金パーティー収入　裏金はおいくらでしたか？（裏金国会議員一覧） | 情報公開クリアリングハウス
                                     </a></li>
                                     <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
                                         href="https://news.ntv.co.jp/pages/uragane">【一覧】自民党国会議員の"裏金"リスト 88人 | 日テレNEWS
                                     </a></li>
                                     <li><a className="font-medium text-blue-600 dark:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer"
-                                        href="http://dailycult.blogspot.com/2021/10/2021.html">【衆院選2021】総力特集・カルト候補ぜんぶ載せ！ | やや日刊カルト新聞
+                                        href="https://www.tokyo-np.co.jp/article/200852">【自民党、旧統一教会と接点ある国会議員は179人　うち121人を公表　選挙支援の依頼は2人 | 東京新聞
                                     </a></li>
                                 </ul>
                             </p>

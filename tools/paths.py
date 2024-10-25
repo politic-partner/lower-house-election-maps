@@ -6,6 +6,7 @@ data_dir = workspace_dir / "tools" / "data"
 
 kickbacks_tsv_file = data_dir / "kickbacks.tsv"
 cults_tsv_file = data_dir / "cults.tsv"
+moonies_tsv_file = data_dir / "moonies.tsv"
 kickback_faces_tsv_file = data_dir / "kickback_faces.tsv"
 
 nhk_dir = data_dir / "nhk"

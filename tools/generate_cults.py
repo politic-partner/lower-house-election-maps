@@ -62,6 +62,29 @@ for line in csv.reader(
 
     print(f"Unknown candidate or kickback: {name}")
 
+for line in csv.reader(
+    paths.moonies_tsv_file.read_text(encoding="utf-8").splitlines(),
+    delimiter="\t",
+):
+    line = utils.normalize(line)
+    name = line[0]
+
+    if name in name2candidates:
+        if name2candidates[name]["id"] not in cults["candidates"]:
+            cults["candidates"][name2candidates[name]["id"]] = {
+                "name": name,
+                "point": None,
+                "links": [notable_cult],
+            }
+        else:
+            links = cults["candidates"][name2candidates[name]["id"]]["links"]
+            if notable_cult in links:
+                links.remove(notable_cult)
+            links.insert(0, notable_cult)
+
+        continue
+
+    print(f"Unknown candidate: {name}")
 
 paths.cults_json_file.write_text(
     json.dumps(cults, ensure_ascii=False, indent=2),
