@@ -25,6 +25,9 @@ type PartyKey = keyof typeof parties;
 type Party = typeof parties[PartyKey];
 type CandidateKey = keyof typeof candidates;
 type Candidate = typeof candidates[CandidateKey];
+type CultBlockKey = keyof typeof cults.blocks;
+type CultBlock = typeof cults.blocks[CultBlockKey];
+type CultBlockPartyKey = keyof CultBlock;
 type BlockKey = keyof typeof blocks;
 type Block = typeof blocks[BlockKey];
 type BlockPartiesKey = keyof Block['parties'];
@@ -32,6 +35,7 @@ type DistrictKey = keyof typeof districts;
 type KickbackDetailKey = keyof typeof kickbacks.details;
 type KickbackDetail = typeof kickbacks.details[KickbackDetailKey];
 type KickbackDistrictKey = keyof typeof kickbacks.not_runs.districts;
+type KickbackBlockKey = keyof typeof kickbacks.not_runs.blocks;
 type KickbackCandidateKey = keyof typeof kickbacks.candidates;
 type DistrictName = typeof textDistrictNames[number];
 type DistrictFeature = typeof geojsonDistricts.features[number];
@@ -96,7 +100,7 @@ function CandidateName({ name, kana }: { name: string, kana?: string }) {
     const nameFragment = name.split(' ');
     return zip(nameFragment, kana?.split(' ') ?? [...Array(nameFragment.length)].map(_ => "　")).map(
         ([name, name_kana], index) => name_kana
-            ? <ruby key={`${name}${index}`}>{name}<rp>(</rp><rt>{name_kana}</rt><rp>)</rp></ruby>
+            ? <ruby key={index}>{name}<rp>(</rp><rt>{name_kana}</rt><rp>)</rp></ruby>
             : name
     );
 }
@@ -110,12 +114,22 @@ function PartyLabel({ party, disabled, className, children }: { party: Party, di
     </div>
 }
 
-function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
+function NewsLink({ href, children }: { href: string, children: React.ReactNode }) {
+    return <a
+        className="text-blue-600 hover:underline text-xs py-0.5 inline-flex items-center justify-center"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+    >
+        {children}<span aria-hidden="true">→</span>
+    </a>;
+}
+
+
+function KickbackCard({ kickback, className }: { kickback: KickbackDetail, className?: string }) {
     const party = parties["1"];
     const name_joined = kickback.name.replace(" ", "");
-    return <div
-        className="w-full align-top flex p-2 bg-white-100 opacity-50 md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
-    >
+    return <div className={`w-svw md:w-96 align-top flex opacity-50 ${className || ''}`}>
         <KickbackFace kickback={kickback} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">
@@ -138,28 +152,14 @@ function KickbackCard({ kickback }: { kickback: KickbackDetail }) {
         </div>
     </div>;
 }
-
-function NewsLink({ href, children }: { href: string, children: React.ReactNode }) {
-    return <a
-        className="text-blue-600 hover:underline text-xs py-0.5 inline-flex items-center justify-center"
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        {children}<span aria-hidden="true">→</span>
-    </a>;
-}
-
-function CandidateCard({ candidate }: { candidate: Candidate }) {
+function CandidateCard({ candidate, className }: { candidate: Candidate, className?: string }) {
     const party = parties[candidate.pid as PartyKey];
     const kickbackId = kickbacks.candidates[candidate.id as KickbackCandidateKey];
     const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
     const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
     const name_joined = candidate.name.replace(" ", "");
 
-    return <div
-        className="w-full align-top flex p-2 bg-white md:w-96 md:border md:border-gray-200 md:rounded-lg md:shadow"
-    >
+    return <div className={`w-svw md:w-96 align-top flex ${className || ''}`}>
         <CandidateFace candidate={candidate} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">
@@ -175,6 +175,7 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
                 <div className="flex flex-wrap gap-1">
                     <span style={{ backgroundColor: party.color }} className="text-white text-xs font-medium px-2.5 py-0.5 rounded">{party.name}</span>
                     <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">{candidate.status}{candidate.win_count === 0 ? <></> : <span> 当選{candidate.win_count}回</span>}</span>
+                    {candidate.did && candidate.bid && <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">比例重複</span>}
                     {candidate.endorser && <span className="bg-blue-100 text-blue-800 text-xs  px-2.5 py-0.5 rounded">{candidate.endorser}推薦</span>}
                     {candidate.supporter && <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">{candidate.supporter}支持</span>}
                     {kickback && <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金<span className="text-xs">{kickback.amount}</span>万円</span>}
@@ -279,7 +280,7 @@ function SheetSmall({ setSheetSize, children }: { setSheetSize: (size: SheetSize
 function DistrictSmall({ districtId, setSheetSize }: { districtId: DistrictKey, setSheetSize: (size: SheetSize) => void }) {
     const district = districts[districtId];
     return <SheetSmall setSheetSize={setSheetSize}>
-        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
+        <h5 className="text-2xl px-4 pt-4 font-bold tracking-tight text-gray-900">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span></h5>
         <div className="overflow-x-scroll flex">
             {districts[districtId].cids.map((cid) => <CandidateSmall key={cid} candidateId={cid as CandidateKey} />)}
             {kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => <NotRunSmall key={kid} kickbackId={kid as KickbackDetailKey} />)}
@@ -292,7 +293,7 @@ function BlockSmall({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize
     const block = blocks[blockId];
     const blockParties = block.parties;
     return <SheetSmall setSheetSize={setSheetSize}>
-        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+        <h5 className="text-2xl px-4 pt-4 font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
         <div className="overflow-x-scroll flex">
             {PARTY_IDS.map((pid) => <div key={pid} className="flex-none px-0 pb-4 first:pl-4 last:pr-4">
                 <PartyLabel party={parties[pid as PartyKey]} disabled={pid in blockParties} className="w-[4.5rem]"> {blockParties[pid as BlockPartiesKey]?.length || "0"}</PartyLabel>
@@ -321,24 +322,25 @@ function SheetFull({ setSheetSize, children }: { setSheetSize: (size: SheetSize)
 
 function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, setSheetSize: (size: SheetSize) => void }) {
     const district = districts[districtId];
-    // const block = blocks[district.bid as BlockKey];
     const districtKickbacks = kickbacks.not_runs.districts[districtId as KickbackDistrictKey]?.map((kid) => kickbacks.details[kid as KickbackDetailKey]);
     return <SheetFull setSheetSize={setSheetSize}>
-        <h5 className="sticky top-0 text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span>
+        <div className="sticky top-0 left-0 px-4 pt-4 h-12 z-10 bg-white bg-opacity-80">
+            <h5 className="text-2xl font-bold tracking-tight text-gray-900">{district.name}<span className="text-sm ml-4">立候補者</span>{district.cids.length}<span className="text-sm">人</span>        </h5>
             <button
                 type="button"
-                className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                className="absolute top-2 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
                 onClick={() => setSheetSize(SheetSize.Small)}
             >
                 <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                 </svg>
             </button>
-        </h5>
-        <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
-            {district.cids.map((cid) => <CandidateCard key={cid} candidate={candidates[cid as CandidateKey]} />)}
-            {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} />)}
         </div>
+        <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
+            {district.cids.map((cid) => <CandidateCard key={cid} candidate={candidates[cid as CandidateKey]} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />)}
+            {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />)}
+        </div>
+
         <hr className="my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
 
         <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">地域</h5>
@@ -348,28 +350,74 @@ function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, s
     </SheetFull>;
 }
 
+const isSafari = (() => {
+    const userAgent = window.navigator.userAgent;
+    return userAgent.includes('Safari') && !userAgent.includes('Chrome');
+})();
 
 function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize: (size: SheetSize) => void }) {
     const block = blocks[blockId];
-    const blockParties = block.parties;
+    const blockPartyIds = PARTY_IDS.filter((pid) => block.parties[pid as BlockPartiesKey] !== undefined);
+    const partyColors = blockPartyIds.map((pid) => parties[pid as PartyKey].color);
+    const partyPaleColors = blockPartyIds.map((pid) => parties[pid as PartyKey].color + '10');
+    const blockParties = blockPartyIds.map((pid) => block.parties[pid as BlockPartiesKey]);
+    const maxCandidateCount = Math.max(...blockPartyIds.map((pid) => blockParties[pid as BlockPartiesKey]?.length || 0));
+    const kickbackDetails = kickbacks.not_runs.blocks[blockId as KickbackBlockKey]?.map((kid) => kickbacks.details[kid as KickbackDetailKey]);
+    const kickbackAmount = kickbacks.blocks[blockId as KickbackBlockKey]
+
     return <SheetFull setSheetSize={setSheetSize}>
-        <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
-        <button
-            type="button"
-            className="absolute top-0 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-            onClick={() => setSheetSize(SheetSize.Small)}
-        >
-            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-        </button>
-        <div className="overflow-x-scroll flex">
-            {PARTY_IDS.map((pid) => <div key={pid} className="flex-none px-0 pb-4 first:pl-4 last:pr-4">
-                <PartyLabel party={parties[pid as PartyKey]} disabled={pid in blockParties} className="w-[4.5rem]"> {blockParties[pid as BlockPartiesKey]?.length || "0"}</PartyLabel>
-            </div>)}
+        <div className="sticky top-0 left-0 px-4 pt-4 h-12 z-10 bg-white bg-opacity-80">
+            <h5 className="text-2xl font-bold tracking-tight text-gray-900">比例{block.name}<span className="text-sm ml-4">定員</span>{block.quota}</h5>
+            <button
+                type="button"
+                className="absolute top-2 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                onClick={() => setSheetSize(SheetSize.Small)}
+            >
+                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                </svg>
+            </button>
         </div>
-        <div className="w-full h-full justify-center place-content-center">
-            <h2 className="text-4xl text-center font-bold text-gray-900 tracking-tight">🚧 作成中 🚧</h2>
+        <div>
+            <table className="w-full overflow-hidden">
+                <thead>
+                    <tr>{blockPartyIds.map((pid, colIndex) =>
+                        <th key={pid} style={{ backgroundColor: partyColors[colIndex] }} className={`${isSafari ? "" : "sticky top-12 z-10"} w-96 text-white p-2 border-b border-gray-200`}>{parties[pid as PartyKey].name_full}</th>
+                    )}</tr>
+                </thead>
+                <tbody className="bg-white divide-x divide-gray-200 overflow-y-auto">
+                    <tr>{blockPartyIds.map((pid, colIndex) => {
+                        const point = cults.blocks[blockId as BlockKey][pid as CultBlockPartyKey]?.point;
+                        return <td key={colIndex} style={{ backgroundColor: partyPaleColors[colIndex] }} className="p-2 border-b border-gray-200">
+                            <div className="flex justify-center gap-1 ">
+                                {colIndex === 0 && kickbackAmount && <span className="bg-red-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">裏金合計<span className="text-xs">{kickbackAmount}</span>万円</span>}
+                                {point && <span className="bg-gray-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">カルト度合計{point}</span>}
+                            </div>
+                        </td>;
+                    })}</tr>
+                    {Array.from({ length: maxCandidateCount }, (_, rowIndex) =>
+                        <tr key={rowIndex}>{blockParties.map((blockParty, colIndex) => {
+                            const element = blockParty[rowIndex];
+                            if (!element) {
+                                return <td key={colIndex} className="p-2 border-b border-gray-200"></td>;
+                            }
+                            return <td key={colIndex} style={{ backgroundColor: partyPaleColors[colIndex] }} className="relative p-2 border-b border-gray-200">
+                                <CandidateCard candidate={candidates[element.cid as CandidateKey]} />
+                                <span className="absolute top-2 right-2 text-xs text-gray-900">名簿順位 {element.order}</span>
+                            </td>;
+                        })}
+                        </tr>
+                    )}
+                    {kickbackDetails && kickbackDetails.map((kickback) => <tr key={kickback.id}>
+                        {blockPartyIds.map((pid, colIndex) => (pid !== "1"
+                            ? <td key={colIndex} className="p-2 border-b border-gray-200"></td>
+                            : <td key={colIndex} style={{ backgroundColor: partyPaleColors[colIndex] }} className="relative p-2 border-b border-gray-200">
+                                <KickbackCard kickback={kickback} />
+                            </td>
+                        ))}
+                    </tr>)}
+                </tbody>
+            </table>
         </div>
     </SheetFull>;
 }
@@ -379,7 +427,7 @@ function Sheet({ size, smallHeight, isBlockScale, children }: { size: SheetSize,
     const bgClass = size === SheetSize.Full ? 'bg-white' : 'bg-white/[.6]';
     return (
         <div className={`${visible} fixed w-svw bottom-0 px-0 mx-0 transition-height overflow-hidden duration-300 ease-in-out`}>
-            <div className={`${size !== SheetSize.Full ? 'bottomSheetKnob rounded-t-xl' : ''} h-full min-w-96 md:max-w-svw py-4 border border-gray-200 shadow transition-colors duration-300 ease-in-out ${bgClass}`}>
+            <div className={`${size !== SheetSize.Full ? 'bottomSheetKnob rounded-t-xl' : ''} h-full min-w-96 border border-gray-200 shadow transition-colors duration-300 ease-in-out ${bgClass}`}>
                 {children}
             </div>
         </div>
@@ -404,18 +452,20 @@ function AboutPanel({ showAboutPanel, setShowAboutPanel }: { showAboutPanel: boo
         <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="fixed inset-0 z-10 w-screen">
                 <div className="flex items-end justify-center text-center">
-                    <div className="h-dvh w-full overflow-y-scroll bg-white text-left">
-                        <div className="relative bg-white px-4 pt-5">
-                            <h1 className="sticky top-0 mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 bg-white bg-opacity-80">衆院選2024候補者マップ</h1>
-                            <button
-                                type="button"
-                                className="fixed top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                                onClick={() => setShowAboutPanel(false)}
-                            >
-                                <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                </svg>
-                            </button>
+                    <div className="h-dvh w-full bg-white text-left overflow-y-scroll">
+                        <div className="relative bg-white px-4">
+                            <div className="sticky top-0 pt-4 z-10 bg-white bg-opacity-80 overflow-hidden">
+                                <h1 className="text-3xl font-extrabold leading-none tracking-tight text-gray-900">衆院選2024候補者マップ</h1>
+                                <button
+                                    type="button"
+                                    className="fixed top-4 right-4 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                                    onClick={() => setShowAboutPanel(false)}
+                                >
+                                    <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                    </svg>
+                                </button>
+                            </div>
 
                             <h3 className="mt-2 text-2xl font-semibold text-gray-900">データ引用元</h3>
                             <p className="my-4">
@@ -744,7 +794,7 @@ export default function App({ }: {}) {
                 >
                     <h2 className="text-md font-bold text-gray-900 tracking-tight">衆院選2024候補者マップ</h2>
                 </div>
-                <Sheet size={districtSheetSize} smallHeight="h-40" isBlockScale={!isBlockScale}>
+                <Sheet size={districtSheetSize} smallHeight="h-36" isBlockScale={!isBlockScale}>
                     {districtId && (districtSheetSize === SheetSize.Full
                         ? <DistrictFull districtId={districtId} setSheetSize={setDistrictSheetSize} />
                         : <DistrictSmall districtId={districtId} setSheetSize={setDistrictSheetSize} />
@@ -763,8 +813,4 @@ export default function App({ }: {}) {
 }
 
 const ROOT = createRoot(document.getElementById('root')!);
-ROOT.render(
-    <StrictMode>
-        <App />
-    </StrictMode>
-)
+ROOT.render(<StrictMode><App /></StrictMode>)

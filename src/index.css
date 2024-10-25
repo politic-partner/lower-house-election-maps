@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 div.bottomSheetKnob::before {
-    position: absolute;
+  position: absolute;
   content: '';
   display: block;
   width: 36px;
@@ -12,5 +12,5 @@ div.bottomSheetKnob::before {
   left: 50%;
   transform: translateX(-50%);
   border-radius: 2px;
-  background-color: var(--rsbs-handle-bg,hsla(0, 0%, 0%, 0.14));
+  background-color: var(--rsbs-handle-bg, hsla(0, 0%, 0%, 0.14));
 }

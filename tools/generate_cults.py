@@ -29,6 +29,7 @@ name2candidates = {
 cults = {
     "candidates": {},
     "kickbacks": {},
+    "blocks": {},
 }
 
 notable_cult = "統一教会"
@@ -53,7 +54,20 @@ for line in csv.reader(
     }
 
     if name in name2candidates:
-        cults["candidates"][name2candidates[name]["id"]] = cult
+        candidate = name2candidates[name]
+        cults["candidates"][candidate["id"]] = cult
+        if candidate["bid"] is None:
+            continue
+
+        block_cult = (
+            cults["blocks"]
+            .setdefault(candidate["bid"], {})
+            .setdefault(candidate["pid"], {"point": 0, "links": {}})
+        )
+        block_cult["point"] += cult_point
+        for link in links:
+            block_cult["links"].setdefault(link, 0)
+            block_cult["links"][link] += 1
         continue
 
     if name in name2kickback_ids:
