@@ -69,6 +69,11 @@ const BLOCK_COLORS = createBlockColors([
     ["11", 0x3c, 0xc1, 0x6d],
 ]);
 
+const isStickyNotSupported = (() => {
+    const userAgent = window.navigator.userAgent;
+    return userAgent.includes('Safari') || userAgent.includes('Chrome');
+})();
+
 const isTouchDevice = 'ontouchstart' in window
     || navigator.maxTouchPoints > 0
     || window.matchMedia('(pointer: coarse)').matches;
@@ -152,6 +157,7 @@ function KickbackCard({ kickback, className }: { kickback: KickbackDetail, class
         </div>
     </div>;
 }
+
 function CandidateCard({ candidate, className }: { candidate: Candidate, className?: string }) {
     const party = parties[candidate.pid as PartyKey];
     const kickbackId = kickbacks.candidates[candidate.id as KickbackCandidateKey];
@@ -350,11 +356,6 @@ function DistrictFull({ districtId, setSheetSize }: { districtId: DistrictKey, s
     </SheetFull>;
 }
 
-const isSafari = (() => {
-    const userAgent = window.navigator.userAgent;
-    return userAgent.includes('Safari') && !userAgent.includes('Chrome');
-})();
-
 function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize: (size: SheetSize) => void }) {
     const block = blocks[blockId];
     const blockPartyIds = PARTY_IDS.filter((pid) => block.parties[pid as BlockPartiesKey] !== undefined);
@@ -382,7 +383,7 @@ function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize:
             <table className="w-full overflow-hidden">
                 <thead>
                     <tr>{blockPartyIds.map((pid, colIndex) =>
-                        <th key={pid} style={{ backgroundColor: partyColors[colIndex] }} className={`${isSafari ? "" : "sticky top-12 z-10"} w-96 text-white p-2 border-b border-gray-200`}>{parties[pid as PartyKey].name_full}</th>
+                        <th key={pid} style={{ backgroundColor: partyColors[colIndex] }} className={`${isStickyNotSupported ? "" : "sticky top-12 z-10"} w-96 text-white p-2 border-b border-gray-200`}>{parties[pid as PartyKey].name_full}</th>
                     )}</tr>
                 </thead>
                 <tbody className="bg-white divide-x divide-gray-200 overflow-y-auto">
