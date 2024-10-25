@@ -186,7 +186,7 @@ function KickbackFace({ kickback, size, showScandal }: { kickback: KickbackDetai
         >
             <img className="w-full h-full object-cover" src={kickback.face_url!} />
         </div>
-        {showScandal && <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
+        {showScandal && <span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
             裏金<span className="text-xs">{kickback.amount}</span>万円
         </span>}
     </div>;
@@ -201,15 +201,15 @@ function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate,
         const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
 
         if (kickback) {
-            warning = <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
+            warning = (<span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
                 裏金 <span className="text-xs" > {kickback.amount}</span > 万円
-            </span >;
+            </span >);
         } else {
             const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
             if (cult) {
-                warning = <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-yellow-500 rounded-full">
+                warning = (<span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-yellow-500 rounded-full">
                     {cult.links[0]}
-                </span >;
+                </span >);
             }
         }
     }
@@ -221,9 +221,7 @@ function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate,
         >
             <img className="w-full h-full object-cover" src={`https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/photo/${candidate.face_image}`} />
         </div>
-        {warning && <span className="absolute -bottom-1 py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
-            {warning}
-        </span>}
+        {warning}
     </div>
 }
 
