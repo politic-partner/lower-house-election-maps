@@ -1,4 +1,5 @@
 /tools/data/nhk/*.xml
+/tools/data/nhk/*.json
 /tools/data/geojson/N03-20240101.geojson
 
 ######### TypeScript

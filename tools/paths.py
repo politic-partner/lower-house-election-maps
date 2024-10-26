@@ -24,6 +24,7 @@ candidates_json_file = assets_dir / "candidates.json"
 kickbacks_json_file = assets_dir / "kickbacks.json"
 cults_json_file = assets_dir / "cults.json"
 parties_json_file = assets_dir / "parties.json"
+nhk_survey_json_file = assets_dir / "nhk_survey.json"
 
 layers_dir = assets_dir / "layers"
 
