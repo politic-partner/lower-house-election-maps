@@ -71,6 +71,7 @@ for kickback_id, line in enumerate(
         "name": name,
         "status": status,
         "amount": kickback_amount,
+        "cid": 0,
         "face_url": name2kickback_faces.get(name.replace(" ", "")),
     }
 
@@ -80,9 +81,11 @@ for kickback_id, line in enumerate(
         kickbacks["blocks"][block["id"]] += kickback_amount
 
     if name in name2candidates:
-        kickback["face_url"] = None
         candidate = name2candidates[name]
         candidate_id = candidate["id"]
+        kickback["face_url"] = None
+        kickback["cid"] = candidate_id
+
         kickbacks["candidates"][candidate_id] = kickback_id
 
         district_id = candidate["did"]
@@ -91,6 +94,9 @@ for kickback_id, line in enumerate(
             district = DISTRICTS[district_id]
             district["cids"].remove(candidate_id)
             district["cids"].insert(0, candidate_id)
+
+        for block in blocks:
+            kickbacks["not_runs"]["blocks"].setdefault(block["id"], []).append(kickback_id)
 
         continue
 

@@ -413,7 +413,10 @@ function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setSheetSize:
                         {blockPartyIds.map((pid, colIndex) => (pid !== "1"
                             ? <td key={colIndex} className="p-2 border-b border-gray-200"></td>
                             : <td key={colIndex} style={{ backgroundColor: partyPaleColors[colIndex] }} className="relative p-2 border-b border-gray-200">
-                                <KickbackCard kickback={kickback} />
+                                {kickback.cid
+                                    ? <CandidateCard candidate={candidates[kickback.cid as CandidateKey]} className="opacity-50" />
+                                    : <KickbackCard kickback={kickback} />
+                                }
                             </td>
                         ))}
                     </tr>)}
