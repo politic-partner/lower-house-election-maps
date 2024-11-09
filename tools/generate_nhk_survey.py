@@ -5,9 +5,10 @@ import nhk_survey_scales
 
 question_id2questions = {
     question["id"]: question
-    for _prefecture_id, prefecture_questions in json.loads(
-        (paths.nhk_dir / "18852questions.json").read_text(encoding="utf-8")
+    for prefecture_id, prefecture_questions in json.loads(
+        (paths.nhk_survey_dir / "18852questions.json").read_text(encoding="utf-8")
     ).items()
+    if prefecture_id == "00"
     for question in prefecture_questions
 }
 
@@ -23,7 +24,7 @@ nhk_survey = {
 }
 
 
-for survey_json_file in paths.nhk_dir.glob("*.json"):
+for survey_json_file in paths.nhk_survey_dir.glob("*.json"):
     if survey_json_file.stem == "18852questions":
         continue
 
@@ -37,15 +38,18 @@ for survey_json_file in paths.nhk_dir.glob("*.json"):
     for candidate_survey in survey:
         candidate_id = str(candidate_survey["candidateID"])
         candidate_answers = {
-            "answers": {},
-            "scales": {},
+            "a": {},
+            "s": {},
         }
         nhk_survey["candidates"][candidate_id] = candidate_answers
 
         for qa in candidate_survey["qa"]:
             question_id = qa["id"]
+            question = question_id2questions.get(question_id)
+            if question is None:
+                continue
+
             answers = qa["answers"]
-            question = question_id2questions[question_id]
             question_type = question["type"]
             options: list[str] = question["selects"]
 
@@ -54,10 +58,10 @@ for survey_json_file in paths.nhk_dir.glob("*.json"):
                 continue
 
             try:
-                candidate_answers[question_id] = options.index(answers[0])
+                candidate_answers["a"][question_id] = options.index(answers[0])
             except IndexError:
                 # 未回答
-                candidate_answers[question_id] = -1
+                candidate_answers["a"][question_id] = -1
             except ValueError:
                 print(
                     f'{district_id}\t{candidate_survey["lastname"]}{candidate_survey["firstname"]}\t{question_id}\t{question["title"]}\t{answers[0]}'

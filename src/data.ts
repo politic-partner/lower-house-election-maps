@@ -9,7 +9,9 @@ import iconBlockKickbacks from './assets/layers/icon_block_kickbacks.json';
 import iconDistrictKickbacks from './assets/layers/icon_district_kickbacks.json';
 import textBlockNames from './assets/layers/text_block_names.json';
 import textDistrictNames from './assets/layers/text_district_names.json';
+import results from './assets/nhk_results.json';
 import parties from './assets/parties.json';
+import survey from './assets/nhk_survey.json';
 
 export {
     blocks,
@@ -18,9 +20,17 @@ export {
     districts, geojsonBlocks,
     geojsonDistricts,
     iconBlockKickbacks,
-    iconDistrictKickbacks, kickbacks, parties, textBlockNames,
-    textDistrictNames
+    iconDistrictKickbacks, kickbacks, parties, results, textBlockNames,
+    textDistrictNames,
+    survey,
 };
+
+export type ResultDistrictKey = keyof typeof results.districts;
+export type SurveyCandidateKey = keyof typeof survey.candidates;
+export type SurveyCandidate = typeof survey.candidates[SurveyCandidateKey];
+export type SurveyCandedateAnswerKey = keyof SurveyCandidate["a"];
+export type SurveyQuestionKey = keyof typeof survey.questions;
+export type SurveyQuestion = typeof survey.questions[SurveyQuestionKey];
 
 export type PartyKey = keyof typeof parties;
 export type Party = typeof parties[PartyKey];

@@ -1,6 +1,7 @@
 import requests
 import csv
 from pathlib import Path
+import datetime
 
 import xml.etree.ElementTree
 
@@ -19,6 +20,8 @@ def get_response_body(url: str):
 
 tools_dir = Path(__file__).parent
 nhk_dir = tools_dir / "data" / "nhk"
+nhk_before_dir = nhk_dir / "before"
+
 sindex_csv_path = nhk_dir / "sindex.csv"
 
 # 小選挙区
@@ -30,7 +33,7 @@ for record in csv.reader(sindex_csv_path.read_text(encoding="utf-8").splitlines(
     district_id = record[3]
     download(
         f"https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/xml/ko/skh{district_id}.xml",
-        nhk_dir / f"skh{district_id}.xml",
+        nhk_before_dir / f"skh{district_id}.xml",
     )
 
 # 比例代表
@@ -45,5 +48,5 @@ for block_id in ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11
     for party_id in party_ids:
         download(
             f"https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/xml/ko/hmb{block_id}_{party_id}.xml",
-            nhk_dir / f"hmb{block_id}_{party_id}.xml",
+            nhk_before_dir / f"hmb{block_id}_{party_id}.xml",
         )

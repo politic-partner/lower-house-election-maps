@@ -1,5 +1,7 @@
-/tools/data/nhk/*.xml
-/tools/data/nhk/*.json
+/tools/data/nhk/before/
+/tools/data/nhk/survey/
+/tools/data/nhk/flash/
+/tools/data/nhk/faces/
 /tools/data/geojson/N03-20240101.geojson
 
 ######### TypeScript

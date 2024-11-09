@@ -10,6 +10,11 @@ moonies_tsv_file = data_dir / "moonies.tsv"
 kickback_faces_tsv_file = data_dir / "kickback_faces.tsv"
 
 nhk_dir = data_dir / "nhk"
+nhk_before_dir = nhk_dir / "before"
+nhk_faces_dir = nhk_dir / "faces"
+nhk_survey_dir = nhk_dir / "survey"
+nhk_flash_dir = nhk_dir / "flash"
+nhk_results_dir = nhk_flash_dir / "20241028095512"
 
 data_geojson_dir = data_dir / "geojson"
 chouchoume_dir = data_geojson_dir / "町丁目"
@@ -25,6 +30,7 @@ kickbacks_json_file = assets_dir / "kickbacks.json"
 cults_json_file = assets_dir / "cults.json"
 parties_json_file = assets_dir / "parties.json"
 nhk_survey_json_file = assets_dir / "nhk_survey.json"
+nhk_results_json_file = assets_dir / "nhk_results.json"
 
 layers_dir = assets_dir / "layers"
 

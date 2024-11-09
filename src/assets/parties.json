@@ -5,6 +5,11 @@
     "name_full": "自由民主党",
     "ruling": true,
     "color": "#d22319",
+    "rgb": [
+      210,
+      35,
+      25
+    ],
     "block_candidate_count": 285
   },
   "195": {
@@ -13,6 +18,11 @@
     "name_full": "立憲民主党",
     "ruling": false,
     "color": "#2391ff",
+    "rgb": [
+      35,
+      145,
+      255
+    ],
     "block_candidate_count": 234
   },
   "187": {
@@ -21,6 +31,11 @@
     "name_full": "日本維新の会",
     "ruling": false,
     "color": "#e19a00",
+    "rgb": [
+      225,
+      154,
+      0
+    ],
     "block_candidate_count": 146
   },
   "3": {
@@ -29,6 +44,11 @@
     "name_full": "公明党",
     "ruling": true,
     "color": "#eb61be",
+    "rgb": [
+      235,
+      97,
+      190
+    ],
     "block_candidate_count": 39
   },
   "4": {
@@ -37,6 +57,11 @@
     "name_full": "日本共産党",
     "ruling": false,
     "color": "#6e41e1",
+    "rgb": [
+      110,
+      65,
+      225
+    ],
     "block_candidate_count": 35
   },
   "197": {
@@ -45,6 +70,11 @@
     "name_full": "国民民主党",
     "ruling": false,
     "color": "#0010a5",
+    "rgb": [
+      0,
+      16,
+      165
+    ],
     "block_candidate_count": 42
   },
   "212": {
@@ -53,6 +83,11 @@
     "name_full": "れいわ新選組",
     "ruling": false,
     "color": "#f0a0a7",
+    "rgb": [
+      240,
+      160,
+      167
+    ],
     "block_candidate_count": 32
   },
   "5": {
@@ -61,6 +96,11 @@
     "name_full": "社会民主党",
     "ruling": false,
     "color": "#05555a",
+    "rgb": [
+      5,
+      85,
+      90
+    ],
     "block_candidate_count": 17
   },
   "227": {
@@ -69,6 +109,11 @@
     "name_full": "参政党",
     "ruling": false,
     "color": "#eb640a",
+    "rgb": [
+      235,
+      100,
+      10
+    ],
     "block_candidate_count": 22
   },
   "243": {
@@ -77,6 +122,11 @@
     "name_full": "みんなでつくる党",
     "ruling": false,
     "color": "#b6c81b",
+    "rgb": [
+      182,
+      200,
+      27
+    ],
     "block_candidate_count": 1
   },
   "245": {
@@ -85,6 +135,11 @@
     "name_full": "日本保守党",
     "ruling": false,
     "color": "#9696f0",
+    "rgb": [
+      150,
+      150,
+      240
+    ],
     "block_candidate_count": 26
   },
   "214": {
@@ -93,6 +148,11 @@
     "name_full": "安楽死制度を考える会",
     "ruling": false,
     "color": "#000546",
+    "rgb": [
+      0,
+      5,
+      70
+    ],
     "block_candidate_count": 2
   },
   "14": {
@@ -101,6 +161,11 @@
     "name_full": "沖縄社会大衆党",
     "ruling": false,
     "color": "#1991aa",
+    "rgb": [
+      25,
+      145,
+      170
+    ],
     "block_candidate_count": 0
   },
   "189": {
@@ -109,6 +174,11 @@
     "name_full": "都民ファーストの会",
     "ruling": false,
     "color": "#666666",
+    "rgb": [
+      102,
+      102,
+      102
+    ],
     "block_candidate_count": 0
   },
   "93": {
@@ -117,6 +187,11 @@
     "name_full": "減税日本",
     "ruling": false,
     "color": "#28c3dc",
+    "rgb": [
+      40,
+      195,
+      220
+    ],
     "block_candidate_count": 0
   },
   "144": {
@@ -125,6 +200,11 @@
     "name_full": "新党大地",
     "ruling": false,
     "color": "#4baa62",
+    "rgb": [
+      75,
+      170,
+      98
+    ],
     "block_candidate_count": 0
   },
   "29": {
@@ -133,6 +213,11 @@
     "name_full": "諸派",
     "ruling": false,
     "color": "#690064",
+    "rgb": [
+      105,
+      0,
+      100
+    ],
     "block_candidate_count": 0
   },
   "-1": {
@@ -141,6 +226,11 @@
     "name_full": "無所属",
     "ruling": false,
     "color": "#4c6a88",
+    "rgb": [
+      76,
+      106,
+      136
+    ],
     "block_candidate_count": 0
   }
 }

@@ -73,6 +73,16 @@ export function CandidateFace({ candidate, size, showScandal }: { candidate: Can
         }
     }
 
+    let result = null;
+    switch (candidate.result) {
+        case "1":
+            result = (<span className="absolute top-0 -left-2 h-8 w-8 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-xl text-nowrap font-bold text-white bg-red-500 rounded-full">当</span >)
+            break;
+        case "4":
+            result = (<span className="absolute top-0 -left-2 h-8 w-8 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-xl text-nowrap font-bold text-white bg-red-500 rounded-full">比</span >)
+            break;
+    }
+
     return <div className={`h-${size} ${showScandal ? 'relative' : ''} flex flex-col items-center overflow-visible`}>
         <div
             style={{ borderColor: party.color }}
@@ -81,6 +91,7 @@ export function CandidateFace({ candidate, size, showScandal }: { candidate: Can
             <img className="w-full h-full object-cover" src={`https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/photo/${candidate.face_image}`} />
         </div>
         {warning}
+        {result}
     </div>
 }
 

@@ -3,11 +3,14 @@
 ## 手順
 
 1. `download_nhk_xml.py`
-2. `generate_nhk_jsons.py.py`
+2. `generate_nhk_jsons.py`
 3. `generate_layer_geojson_districts.py`
 3. `generate_layer_geojson_blocks.py`
 4. `generate_layer_text_block_names.py`
 4. `generate_layer_text_districts_names.py`
+5. `generate_kickbacks.py`
+5. `generate_cults.py`
+5. `generate_nhk_results.py`
 
 ## Data
 

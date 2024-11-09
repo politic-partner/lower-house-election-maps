@@ -1,21 +1,5 @@
-import { CandidateName, NewsLink } from '.';
+import { CandidateFace, CandidateName, KickbackFace, NewsLink } from '.';
 import { Candidate, cults, KickbackCandidateKey, KickbackDetail, KickbackDetailKey, kickbacks, parties, PartyKey } from '../data';
-
-
-function KickbackFace({ kickback, size, showScandal }: { kickback: KickbackDetail, size: number, showScandal: boolean }) {
-    return <div className={`h-${size} relative flex flex-col items-center overflow-visible`}>
-        <div
-            style={{ borderColor: parties["1" as PartyKey].color, opacity: showScandal ? 0.5 : 1.0 }}
-            className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
-        >
-            <img className="w-full h-full object-cover" src={kickback.face_url!} />
-        </div>
-        {showScandal && <span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
-            裏金<span className="text-xs">{kickback.amount}</span>万円
-        </span>}
-    </div>;
-}
-
 
 export function KickbackCard({ kickback, className }: { kickback: KickbackDetail, className?: string }) {
     const party = parties["1"];
@@ -42,39 +26,6 @@ export function KickbackCard({ kickback, className }: { kickback: KickbackDetail
             </div>
         </div>
     </div>;
-}
-
-function CandidateFace({ candidate, size, showScandal }: { candidate: Candidate, size: number, showScandal: boolean }) {
-    const party = parties[candidate.pid as PartyKey];
-    let warning = null;
-
-    if (showScandal) {
-        const kickbackId = kickbacks.candidates[candidate.id as KickbackCandidateKey];
-        const kickback = kickbackId ? kickbacks.details[kickbackId as KickbackDetailKey] : null;
-
-        if (kickback) {
-            warning = (<span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-red-500 rounded-full">
-                裏金 <span className="text-xs" > {kickback.amount}</span > 万円
-            </span >);
-        } else {
-            const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
-            if (cult) {
-                warning = (<span className="absolute -bottom-1 whitespace-nowrap py-0.5 px-1 inline-flex items-center justify-center text-[0.5rem] text-nowrap font-bold text-white bg-yellow-500 rounded-full">
-                    {cult.links[0]}
-                </span >);
-            }
-        }
-    }
-
-    return <div className={`h-${size} ${showScandal ? 'relative' : ''} flex flex-col items-center overflow-visible`}>
-        <div
-            style={{ borderColor: party.color }}
-            className={`w-${size} h-${size} overflow-hidden rounded-full border-4`}
-        >
-            <img className="w-full h-full object-cover" src={`https://www.nhk.or.jp/senkyo-data/database/shugiin/2024/00/18852/photo/${candidate.face_image}`} />
-        </div>
-        {warning}
-    </div>
 }
 
 export function CandidateCard({ candidate, className }: { candidate: Candidate, className?: string }) {

@@ -14,7 +14,7 @@ export function Sheet({ size, smallHeight, isBlockScale, children }: { size: She
     const visible = size === SheetSize.Full ? 'h-svh' : ((size === SheetSize.Small && isBlockScale) ? smallHeight : 'h-0');
     const bgClass = size === SheetSize.Full ? 'bg-white' : 'bg-white/[.6]';
     return (
-        <div className={`${visible} fixed w-svw bottom-0 px-0 mx-0 transition-height overflow-hidden duration-300 ease-in-out`}>
+        <div className={`${visible} fixed w-svw bottom-0 px-0 mx-0 z-10 transition-height overflow-hidden duration-300 ease-in-out`}>
             <div className={`${size !== SheetSize.Full ? 'bottomSheetKnob rounded-t-xl' : ''} h-full min-w-96 border border-gray-200 shadow transition-colors duration-300 ease-in-out ${bgClass}`}>
                 {children}
             </div>
@@ -58,7 +58,13 @@ export function DistrictFull({ districtId, setSheetSize }: { districtId: Distric
                 </button>
             </div>
             <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
-                {district.cids.map((cid) => <CandidateCard key={cid} candidate={candidates[cid as CandidateKey]} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />)}
+                {district.cids.map((cid) => {
+                    const candidate = candidates[cid as CandidateKey];
+                    return <div key={cid} className="relative">
+                        <CandidateCard candidate={candidate} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />
+                        <span className="absolute top-6 right-2 text-xs text-gray-900">得票率 {(candidate.share * 100).toFixed(1)}%</span>
+                    </div>;
+                })}
                 {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />)}
             </div>
             <hr className="my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
@@ -115,9 +121,15 @@ export function BlockFull({ blockId, setSheetSize }: { blockId: BlockKey, setShe
                                 if (!element) {
                                     return <td key={colIndex} className="p-2 border-b border-gray-200"></td>;
                                 }
+                                const candidate = candidates[element.cid as CandidateKey];
                                 return <td key={colIndex} style={{ backgroundColor: partyPaleColors[colIndex] }} className="relative p-2 border-b border-gray-200">
-                                    <CandidateCard candidate={candidates[element.cid as CandidateKey]} />
+                                    <CandidateCard candidate={candidate} />
                                     <span className="absolute top-2 right-2 text-xs text-gray-900">名簿順位 {element.order}</span>
+                                    {
+                                        (candidate.loss_rate > 0 && candidate.loss_rate != 1) &&
+                                        <span className="absolute top-6 right-2 text-xs text-gray-900">惜敗率 {(candidate.loss_rate * 100).toFixed(1)}%</span>
+                                    }
+
                                 </td>;
                             })}
                             </tr>

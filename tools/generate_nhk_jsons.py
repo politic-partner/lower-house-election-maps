@@ -22,6 +22,7 @@ class Party:
     name_full: str
     ruling: bool
     color: str
+    rgb: tuple[int, int, int]
     block_candidate_count: int = 0
 
 
@@ -32,6 +33,9 @@ class Candidate:
     name_kana: str
     pid: str
     age: int
+    result: str
+    share: float
+    loss_rate: float
     status: str
     win_count: int
     did: Optional[str]
@@ -74,6 +78,10 @@ class Block:
     parties: dict[str, list[PartyListElement]]
 
 
+def hex2rgb(hex_color: str) -> tuple[int, int, int]:
+    return tuple(int(hex_color[i : i + 2], 16) for i in (1, 3, 5))
+
+
 party_id2party = {
     line[1]: Party(
         id=line[1],
@@ -81,6 +89,7 @@ party_id2party = {
         name_full=line[4],
         ruling=line[5] == "1",
         color=line[6] if len(line) > 6 else "#666666",
+        rgb=hex2rgb(line[6] if len(line) > 6 else "#666666"),
     )
     for line in csv.reader(
         (paths.nhk_dir / "stindex.csv").read_text(encoding="utf-8").splitlines()[1:]
@@ -111,6 +120,9 @@ def to_candidate(
         name_kana=element.attrib["khNmKana"],
         pid=party_id or name2parties[element.attrib["prtyNm"]].id,
         age=int(element.attrib["age"]),
+        result=element.attrib["senkTstkSts"],
+        share=0 if block_id else float(element.attrib["hyoRate"]) / 100,
+        loss_rate=0,
         status=element.attrib["zmskNm"],
         win_count=int(element.attrib["tsKaisu"]),
         did=district_id,
@@ -128,7 +140,7 @@ def to_candidate(
 
 
 # 小選挙区
-for xml_path in sorted(paths.nhk_dir.glob("skh*.xml")):
+for xml_path in sorted(paths.nhk_results_dir.glob("skh*.xml")):
     nhkel = xml.etree.ElementTree.parse(xml_path).getroot()
     for senk in nhkel.findall("senk"):
         district_id = senk.attrib["senkId"]
@@ -156,7 +168,7 @@ for xml_path in sorted(paths.nhk_dir.glob("skh*.xml")):
         )
 
 # 比例代表
-for xml_path in sorted(paths.nhk_dir.glob("hmb*.xml")):
+for xml_path in sorted(paths.nhk_results_dir.glob("hmb*.xml")):
     nhkel = xml.etree.ElementTree.parse(xml_path).getroot()
     hrBlk = nhkel.find("hrBlk")
     block_id = hrBlk.attrib["hrBlkCd"]
@@ -177,6 +189,9 @@ for xml_path in sorted(paths.nhk_dir.glob("hmb*.xml")):
             candidates[candidate_id] = candidate
 
         candidate.bid = block_id
+        candidate.loss_rate = float(meibo.attrib["nrwRate"]) / 100
+        if candidate.result == "0":
+            candidate.result = meibo.attrib["hrTstkSts"]
         block_partylist.append(
             PartyListElement(order=int(meibo.attrib["hrMeiboOdr"]), cid=candidate_id)
         )

@@ -26,6 +26,10 @@ name2districts = {district["name"]: district for district in DISTRICTS.values()}
 blocks = json.loads(paths.blocks_json_file.read_text(encoding="utf-8"))
 name2blocks = {block["name"]: block for block in blocks.values()}
 
+# 裏金議員を選挙区の先頭に表示するかどうか
+# 投票日前は True にする
+kickback_emphasis = False
+
 kickbacks = {
     "details": {},
     "candidates": {},
@@ -89,8 +93,8 @@ for kickback_id, line in enumerate(
         kickbacks["candidates"][candidate_id] = kickback_id
 
         district_id = candidate["did"]
-        if district_id is not None:
-            # 該当の candidate を該当の district の先頭に移動
+        if kickback_emphasis and district_id is not None:
+            # candidate を該当の district の先頭に移動
             district = DISTRICTS[district_id]
             district["cids"].remove(candidate_id)
             district["cids"].insert(0, candidate_id)
@@ -186,7 +190,8 @@ paths.layer_icon_block_kickbacks_json_file.write_text(
     encoding="utf-8",
 )
 
-paths.districts_json_file.write_text(
-    json.dumps(DISTRICTS, ensure_ascii=False, indent=2),
-    encoding="utf-8",
-)
+if kickback_emphasis:
+    paths.districts_json_file.write_text(
+        json.dumps(DISTRICTS, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
