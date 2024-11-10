@@ -4,7 +4,7 @@ import { Candidate, cults, KickbackCandidateKey, KickbackDetail, KickbackDetailK
 export function KickbackCard({ kickback, className }: { kickback: KickbackDetail, className?: string }) {
     const party = parties["1"];
     const name_joined = kickback.name.replace(" ", "");
-    return <div className={`w-svw md:w-96 align-top flex opacity-50 ${className || ''}`}>
+    return <div className={`align-top flex opacity-50 ${className || ''}`}>
         <KickbackFace kickback={kickback} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">
@@ -35,7 +35,7 @@ export function CandidateCard({ candidate, className }: { candidate: Candidate, 
     const cult = cults.candidates[candidate.id as keyof typeof cults.candidates];
     const name_joined = candidate.name.replace(" ", "");
 
-    return <div className={`w-svw md:w-96 align-top flex ${className || ''}`}>
+    return <div className={`align-top flex ${className || ''}`}>
         <CandidateFace candidate={candidate} size={16} showScandal={true} />
         <div className="flex flex-col px-2 leading-normal">
             <h5 className="text-2xl font-bold tracking-tight text-gray-900">

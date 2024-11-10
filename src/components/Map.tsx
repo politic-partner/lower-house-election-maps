@@ -3,33 +3,12 @@ import { BitmapLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import { Color, DeckGL, GeoJsonLayer, Layer, MapView, MapViewState, TileLayer } from 'deck.gl';
 import type { Feature, Geometry } from 'geojson';
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDebounce } from 'use-debounce';
 import { isTouchDevice, SCREEN_ORIENTATION_TYPE } from '.';
+import { blockColors, colorPalette, palletChoice3, palletChoice4, palletChoice5, palletChoice6 } from '../colors';
 import { BlockKey, BlockName, BlockProperties, blocks, CandidateKey, candidates, DistrictKey, DistrictName, DistrictProperties, districts, geojsonBlocks, geojsonDistricts, iconBlockKickbacks, iconDistrictKickbacks, parties, PartyKey, ResultDistrictKey, results, survey, SurveyCandidateKey, SurveyQuestionKey, textBlockNames, textDistrictNames } from '../data';
 import { BlockFull, BlockSmall, DistrictFull, DistrictSmall, Sheet, SheetSize } from './Sheets';
-
-const createBlockColors = (colors: [string, number, number, number][]): Record<string, { fillColor: Color, borderColor: Color, backgroundColor: Color, fontColor: Color }> => colors.reduce((acc, [key, r, g, b]) => {
-    acc[key] = {
-        fillColor: [r, g, b, 0x1f],
-        borderColor: [r, g, b, 0xff],
-        backgroundColor: [Math.min(255, 128 + r), Math.min(255, 128 + g), Math.min(255, 128 + b), 0x7f],
-        fontColor: [r / 1.7 | 0, g / 1.7 | 0, b / 1.7 | 0, 0xff]
-    };
-    return acc;
-}, {} as Record<string, { fillColor: Color, borderColor: Color, backgroundColor: Color, fontColor: Color }>);
-
-const BLOCK_COLORS = createBlockColors([
-    ["01", 0x00, 0xd7, 0xd2],
-    ["02", 0x6a, 0xcf, 0x80],
-    ["03", 0xf9, 0xa4, 0x5c],
-    ["04", 0xf0, 0xac, 0xb7],
-    ["05", 0xef, 0x62, 0x72],
-    ["06", 0xf1, 0xcc, 0x71],
-    ["07", 0xb7, 0xa4, 0xe1],
-    ["08", 0x8a, 0x9f, 0xed],
-    ["09", 0x7b, 0xc8, 0xfd],
-    ["10", 0xae, 0xd9, 0x3a],
-    ["11", 0x3c, 0xc1, 0x6d],
-]);
 
 const ZOOM_LEVEL = SCREEN_ORIENTATION_TYPE.includes("landscape") ? 5 : 4;
 
@@ -45,8 +24,8 @@ const INITIAL_VIEW_STATE: MapViewState = {
     transitionDuration: 500,
 };
 
-const getFillColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => BLOCK_COLORS[f.properties.bid].fillColor;
-const getLineColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => BLOCK_COLORS[f.properties.bid].borderColor;
+const getFillColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => blockColors[f.properties.bid].fillColor;
+const getLineColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => blockColors[f.properties.bid].borderColor;
 
 
 type DistrictToColor = (districtId: DistrictKey) => Color;
@@ -62,61 +41,11 @@ const getAnswer = (districtId: string, questionId: string) => {
     return survey.candidates[wonCandidateId].a[questionId as SurveyQuestionKey];
 }
 
-const toColor = (c: number) => [(c >> 16) & 0xff, (c >> 8) & 0xff, c & 0xff, 128] as Color;
-
-const palletChoice3 = [
-    0x2563eb,
-    0xdc2626,
-    0xd1d5db,
-].map(toColor);
-
-const palletChoice4 = [
-    0x2563eb,
-    0xf9fafb,
-    0xdc2626,
-    0xd1d5db,
-].map(toColor);
-
-const palletChoice5 = [
-    0x2563eb,
-    0x93c5fd,
-    0xfca5a5,
-    0xdc2626,
-    0xd1d5db,
-].map(toColor);
-
-const palletChoice6 = [
-    0x6929c4,
-    0x1192e8,
-    0x005d5d,
-    0x9f1853,
-    0xfa4d56,
-    0xd1d5db,
-].map(toColor);
-
-const colorPalette = [
-    0x6929c4,
-    0x1192e8,
-    0x005d5d,
-    0x9f1853,
-    0xfa4d56,
-    0x570408,
-    0x198038,
-    0x002d9c,
-    0xee538b,
-    0xb28600,
-    0x009d9a,
-    0x012749,
-    0x8a3800,
-    0xa56eff,
-].map(toColor);
-
 const toViewData = (id: string, palette: Color[]) => [id, {
     id: id,
     districtToColor: (districtId: DistrictKey) => palette[getAnswer(districtId, id)],
     palette: palette,
 }];
-
 
 const viewDatas: { [key: string]: ViewData } = Object.fromEntries([
     ["party", {
@@ -192,7 +121,7 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
             </button>
         </div>
         <div
-            className={`fixed top-0 left-0 w-svw md:w-96 h-svh p-4 overflow-y-auto transition-transform bg-white border-r border-gray-200 rounded-lg ${openDrawer ? "transform-none" : "-translate-y-full"}`}
+            className={`z-20 fixed top-0 left-0 w-svw md:w-96 h-svh p-4 overflow-y-auto transition-transform bg-white border-r border-gray-200 rounded-lg ${openDrawer ? "transform-none" : "-translate-y-full"}`}
             tabIndex={-1}
         >
             <button
@@ -216,19 +145,62 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
     </>;
 }
 
-export function Map() {
+export function Map({
+    districtId: initialDistrictId,
+    blockId: initialBlockId,
+    latitude: initialLatitude,
+    longitude: initialLongitude,
+    zoom: initialZoom,
+    sheetSize: initialSheetSize,
+}: {
+    districtId: DistrictKey | null;
+    blockId: BlockKey | null;
+    latitude: number | null;
+    longitude: number | null;
+    zoom: number | null;
+    sheetSize: SheetSize | null;
+}) {
     const fontSize = 32;
 
-    const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
-    const [blockId, setBlockId] = useState<BlockKey | null>(null);
-    const [blockSheetSize, setBlockSheetSize] = useState<SheetSize>(SheetSize.Hidden);
-    const [districtId, setDistrictId] = useState<DistrictKey | null>(null);
-    const [districtSheetSize, setDistrictSheetSize] = useState<SheetSize>(SheetSize.Hidden);
+    const [viewState, setViewState] = useState<MapViewState>({
+        latitude: initialLatitude || INITIAL_VIEW_STATE.latitude,
+        longitude: initialLongitude || INITIAL_VIEW_STATE.longitude,
+        zoom: initialZoom || INITIAL_VIEW_STATE.zoom,
+        maxZoom: INITIAL_VIEW_STATE.maxZoom,
+        minZoom: INITIAL_VIEW_STATE.minZoom,
+        maxPitch: INITIAL_VIEW_STATE.maxPitch,
+        pitch: INITIAL_VIEW_STATE.pitch,
+        bearing: INITIAL_VIEW_STATE.bearing,
+        transitionDuration: INITIAL_VIEW_STATE.transitionDuration,
+    });
+    const [blockId, setBlockId] = useState<BlockKey | null>(initialBlockId);
+    const [districtId, setDistrictId] = useState<DistrictKey | null>(initialDistrictId);
     const [viewData, setViewData] = useState<ViewData>(viewDatas["party"]);
+    const [sheetSize, setSheetSize] = useState<SheetSize>(initialSheetSize || SheetSize.Hidden);
+    const navigate = useNavigate();
+    const [debouncedViewState] = useDebounce(viewState, 500);
 
     const onViewStateChange = useCallback(({ viewState }: { viewState: MapViewState }) => {
         setViewState(viewState);
     }, []);
+
+    useEffect(() => {
+        const params = new URLSearchParams();
+
+        if (districtId) params.append('did', districtId);
+        if (blockId) params.append('bid', blockId);
+        params.append('pos', `${debouncedViewState.latitude.toFixed(3)} ${debouncedViewState.longitude.toFixed(3)}`);
+        params.append('zoom', debouncedViewState.zoom.toFixed(2));
+        params.append('sheetSize', SheetSize[sheetSize]);
+
+        navigate(`?${params.toString()}`, { replace: true });
+    }, [
+        districtId,
+        blockId,
+        debouncedViewState,
+        navigate,
+        sheetSize,
+    ]);
 
     // const getUserLocation = () => {
     //     if (!navigator.geolocation) {
@@ -295,28 +267,22 @@ export function Map() {
             onHover: ({ object }) => {
                 if (object) {
                     setDistrictId(object.properties.did as DistrictKey);
-                    setDistrictSheetSize(SheetSize.Small);
                     setBlockId(object.properties.bid as BlockKey);
-                    setBlockSheetSize(SheetSize.Small);
+                    setSheetSize(SheetSize.Small);
                 } else {
-                    setDistrictSheetSize(SheetSize.Hidden);
-                    setBlockSheetSize(SheetSize.Hidden);
+                    setSheetSize(SheetSize.Hidden);
                 }
             },
             onClick: ({ object }) => {
-                if (isTouchDevice) {
-                    return;
-                };
+                if (isTouchDevice) return;
                 setDistrictId(object?.properties.did as DistrictKey);
-                setDistrictSheetSize(SheetSize.Full);
                 setBlockId(object?.properties.bid as BlockKey);
-                setBlockSheetSize(SheetSize.Hidden);
+                setSheetSize(SheetSize.Full);
             },
             onTouchStart: ({ object }: { object: Feature<Geometry, DistrictProperties> | null }) => {
                 setDistrictId(object?.properties.did as DistrictKey);
-                setDistrictSheetSize(SheetSize.Full);
                 setBlockId(object?.properties.bid as BlockKey);
-                setBlockSheetSize(SheetSize.Hidden);
+                setSheetSize(SheetSize.Full);
             },
             updateTriggers: {
                 getLineWidth: [districtId, districtLineWidth],
@@ -334,30 +300,28 @@ export function Map() {
             stroked: true,
             filled: true,
             pickable: true,
-            getFillColor: d=> [0, 0, 0, 0],
+            getFillColor: d => [0, 0, 0, 0],
             getLineColor: getLineColor,
             getLineWidth: (f: Feature<Geometry, BlockProperties>) => (blockId === f.properties.bid) ? districtLineWidth * 2 : districtLineWidth,
             lineWidthUnits: 'pixels',
             onHover: ({ object }) => {
                 if (object) {
                     setBlockId(object.properties.bid as BlockKey);
-                    setBlockSheetSize(SheetSize.Small);
+                    setSheetSize(SheetSize.Small);
                 } else {
-                    setBlockSheetSize(SheetSize.Hidden);
+                    setSheetSize(SheetSize.Hidden);
                 }
             },
             onClick: ({ object }) => {
-                if (isTouchDevice) {
-                    return;
-                };
-                setDistrictSheetSize(SheetSize.Hidden);
+                if (isTouchDevice) return;
+                setDistrictId(object?.properties.did as DistrictKey);
                 setBlockId(object?.properties.bid as BlockKey);
-                setBlockSheetSize(SheetSize.Full);
+                setSheetSize(SheetSize.Full);
             },
             onTouchStart: ({ object }: { object: Feature<Geometry, DistrictProperties> | null }) => {
-                setDistrictSheetSize(SheetSize.Hidden);
+                setDistrictId(object?.properties.did as DistrictKey);
                 setBlockId(object?.properties.bid as BlockKey);
-                setBlockSheetSize(SheetSize.Full);
+                setSheetSize(SheetSize.Full);
             },
             updateTriggers: {
                 getLineWidth: [blockId, districtLineWidth]
@@ -377,13 +341,13 @@ export function Map() {
             // TextLayer options
             getText: d => districts[d.d as keyof typeof districts].name,
             getPosition: d => [d.p[0], d.p[1], 200],
-            getColor: d => BLOCK_COLORS[d.b].fontColor,
+            getColor: d => blockColors[d.b].fontColor,
             getSize: d => Math.pow(d.a, 0.25),
             sizeScale: fontSize,
             sizeMaxPixels,
             sizeMinPixels,
             background: true,
-            getBackgroundColor: d => BLOCK_COLORS[d.b].backgroundColor,
+            getBackgroundColor: d => blockColors[d.b].backgroundColor,
             maxWidth: 64 * 12,
 
             // CollideExtension options
@@ -435,7 +399,7 @@ export function Map() {
             // TextLayer options
             getText: d => blocks[d.b as keyof typeof blocks].name,
             getPosition: d => [d.p[0], d.p[1], d.a * 2000],
-            getColor: d => BLOCK_COLORS[d.b].fontColor,
+            getColor: d => blockColors[d.b].fontColor,
             getSize: d => Math.pow(d.a, 0.25),
             sizeScale: fontSize,
             sizeMaxPixels,
@@ -482,17 +446,20 @@ export function Map() {
             onViewStateChange={onViewStateChange}
         />
         <FocusPanel viewData={viewData} setViewData={setViewData} />
-        <Sheet size={districtSheetSize} smallHeight="h-36" isBlockScale={!isBlockScale}>
-            {districtId && (districtSheetSize === SheetSize.Full
-                ? <DistrictFull districtId={districtId} setSheetSize={setDistrictSheetSize} />
-                : <DistrictSmall districtId={districtId} setSheetSize={setDistrictSheetSize} />
-            )}
-        </Sheet>
-        <Sheet size={blockSheetSize} smallHeight="h-20" isBlockScale={isBlockScale}>
-            {blockId && (blockSheetSize === SheetSize.Full
-                ? <BlockFull blockId={blockId} setSheetSize={setBlockSheetSize} />
-                : <BlockSmall blockId={blockId} setSheetSize={setBlockSheetSize} />
-            )}
-        </Sheet>
+        {viewState.zoom >= 6 ? (
+            <Sheet size={sheetSize} smallHeight="h-36" isBlockScale={!isBlockScale}>
+                {districtId && (sheetSize === SheetSize.Full
+                    ? <DistrictFull districtId={districtId} setSheetSize={setSheetSize} />
+                    : <DistrictSmall districtId={districtId} setSheetSize={setSheetSize} />
+                )}
+            </Sheet>
+        ) : (
+            <Sheet size={sheetSize} smallHeight="h-20" isBlockScale={isBlockScale}>
+                {blockId && (sheetSize === SheetSize.Full
+                    ? <BlockFull blockId={blockId} setSheetSize={setSheetSize} />
+                    : <BlockSmall blockId={blockId} setSheetSize={setSheetSize} />
+                )}
+            </Sheet>
+        )}
     </>;
 }

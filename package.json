@@ -12,7 +12,9 @@
   "dependencies": {
     "deck.gl": "^9.0.35",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

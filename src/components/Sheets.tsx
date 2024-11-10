@@ -57,15 +57,15 @@ export function DistrictFull({ districtId, setSheetSize }: { districtId: Distric
                     <IconCross className="w-3 h-3" aria-hidden="true" />
                 </button>
             </div>
-            <div className="flex flex-wrap min-w-32 m-4 gap-2 divide-y">
+            <div className="flex flex-wrap m-4 gap-2 divide-y">
                 {district.cids.map((cid) => {
                     const candidate = candidates[cid as CandidateKey];
-                    return <div key={cid} className="relative">
+                    return <div key={cid} className="relative w-full md:w-96">
                         <CandidateCard candidate={candidate} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />
                         <span className="absolute top-6 right-2 text-xs text-gray-900">得票率 {(candidate.share * 100).toFixed(1)}%</span>
                     </div>;
                 })}
-                {districtKickbacks && districtKickbacks.map((kickback) => <KickbackCard key={kickback.id} kickback={kickback} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" />)}
+                {districtKickbacks && districtKickbacks.map((kickback) => <div key={kickback.id} className="relative w-full md:w-96"><KickbackCard kickback={kickback} className="p-2 bg-white md:border md:border-gray-200 md:rounded-lg md:shadow" /></div>)}
             </div>
             <hr className="my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
             <h5 className="text-2xl px-4 font-bold tracking-tight text-gray-900 bg-white bg-opacity-80">地域</h5>
