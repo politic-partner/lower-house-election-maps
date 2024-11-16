@@ -24,7 +24,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
     transitionDuration: 500,
 };
 
-const getFillColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => blockColors[f.properties.bid].fillColor;
+// const getFillColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => blockColors[f.properties.bid].fillColor;
 const getLineColor = (f: Feature<Geometry, BlockProperties | DistrictProperties>) => blockColors[f.properties.bid].borderColor;
 
 
@@ -300,7 +300,7 @@ export function Map({
             stroked: true,
             filled: true,
             pickable: true,
-            getFillColor: d => [0, 0, 0, 0],
+            getFillColor: [0, 0, 0, 0],
             getLineColor: getLineColor,
             getLineWidth: (f: Feature<Geometry, BlockProperties>) => (blockId === f.properties.bid) ? districtLineWidth * 2 : districtLineWidth,
             lineWidthUnits: 'pixels',
