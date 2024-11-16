@@ -3,8 +3,8 @@ import { BitmapLayer, IconLayer, TextLayer } from '@deck.gl/layers';
 import { Color, DeckGL, GeoJsonLayer, Layer, MapView, MapViewState, TileLayer } from 'deck.gl';
 import type { Feature, Geometry } from 'geojson';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDebounce } from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
+import { encodeString, QueryParamConfig, useQueryParam } from 'use-query-params';
 import { isTouchDevice, SCREEN_ORIENTATION_TYPE } from '.';
 import { blockColors, colorPalette, palletChoice3, palletChoice4, palletChoice5, palletChoice6 } from '../colors';
 import { BlockKey, BlockName, BlockProperties, blocks, CandidateKey, candidates, DistrictKey, DistrictName, DistrictProperties, districts, geojsonBlocks, geojsonDistricts, iconBlockKickbacks, iconDistrictKickbacks, parties, PartyKey, ResultDistrictKey, results, survey, SurveyCandidateKey, SurveyQuestionKey, textBlockNames, textDistrictNames } from '../data';
@@ -145,27 +145,39 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
     </>;
 }
 
-export function Map({
-    districtId: initialDistrictId,
-    blockId: initialBlockId,
-    latitude: initialLatitude,
-    longitude: initialLongitude,
-    zoom: initialZoom,
-    sheetSize: initialSheetSize,
-}: {
-    districtId: DistrictKey | null;
-    blockId: BlockKey | null;
-    latitude: number | null;
-    longitude: number | null;
-    zoom: number | null;
-    sheetSize: SheetSize | null;
-}) {
+const DistrictParam: QueryParamConfig<DistrictKey | null, DistrictKey | null> = {
+    encode: encodeString,
+    decode: (v) => v === null ? null : v as DistrictKey,
+};
+const BlockParam: QueryParamConfig<BlockKey | null, BlockKey | null> = {
+    encode: encodeString,
+    decode: (v) => v === null ? null : v as BlockKey,
+};
+const SheetSizeParam: QueryParamConfig<SheetSize, SheetSize> = {
+    encode: (v) => SheetSize[v],
+    decode: (v) => v ? SheetSize[v as keyof typeof SheetSize] : SheetSize.Hidden,
+};
+const PosPraram: QueryParamConfig<number[], number[]> = {
+    encode: (v) => v.map(d => d.toFixed(3)).join(' '),
+    decode: (v) => typeof v === 'string' ? v.split(' ').map(Number) : [INITIAL_VIEW_STATE.latitude, INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.zoom],
+};
+const ViewDataParam: QueryParamConfig<ViewData, ViewData> = {
+    encode: (v) => v.id,
+    decode: (v) => typeof v === 'string' ? viewDatas[v] : viewDatas["party"],
+};
+
+export function Map() {
     const fontSize = 32;
 
+    const [districtId, setDistrictId] = useQueryParam('did', DistrictParam);
+    const [blockId, setBlockId] = useQueryParam('bid', BlockParam);
+    const [pos, setPos] = useQueryParam('pos', PosPraram);
+    const [sheetSize, setSheetSize] = useQueryParam('sheetSize', SheetSizeParam);
+
     const [viewState, setViewState] = useState<MapViewState>({
-        latitude: initialLatitude || INITIAL_VIEW_STATE.latitude,
-        longitude: initialLongitude || INITIAL_VIEW_STATE.longitude,
-        zoom: initialZoom || INITIAL_VIEW_STATE.zoom,
+        latitude: pos[0] || INITIAL_VIEW_STATE.latitude,
+        longitude: pos[1] || INITIAL_VIEW_STATE.longitude,
+        zoom: pos[2] || INITIAL_VIEW_STATE.zoom,
         maxZoom: INITIAL_VIEW_STATE.maxZoom,
         minZoom: INITIAL_VIEW_STATE.minZoom,
         maxPitch: INITIAL_VIEW_STATE.maxPitch,
@@ -173,50 +185,14 @@ export function Map({
         bearing: INITIAL_VIEW_STATE.bearing,
         transitionDuration: INITIAL_VIEW_STATE.transitionDuration,
     });
-    const [blockId, setBlockId] = useState<BlockKey | null>(initialBlockId);
-    const [districtId, setDistrictId] = useState<DistrictKey | null>(initialDistrictId);
-    const [viewData, setViewData] = useState<ViewData>(viewDatas["party"]);
-    const [sheetSize, setSheetSize] = useState<SheetSize>(initialSheetSize || SheetSize.Hidden);
-    const navigate = useNavigate();
-    const [debouncedViewState] = useDebounce(viewState, 500);
+
+    const [viewData, setViewData] = useQueryParam('viewData', ViewDataParam);
+    const debouncedSetPos = useDebouncedCallback(setPos, 500);
 
     const onViewStateChange = useCallback(({ viewState }: { viewState: MapViewState }) => {
         setViewState(viewState);
+        debouncedSetPos([viewState.latitude, viewState.longitude, viewState.zoom]);
     }, []);
-
-    useEffect(() => {
-        const params = new URLSearchParams();
-
-        if (districtId) params.append('did', districtId);
-        if (blockId) params.append('bid', blockId);
-        params.append('pos', `${debouncedViewState.latitude.toFixed(3)} ${debouncedViewState.longitude.toFixed(3)}`);
-        params.append('zoom', debouncedViewState.zoom.toFixed(2));
-        params.append('sheetSize', SheetSize[sheetSize]);
-
-        navigate(`?${params.toString()}`, { replace: true });
-    }, [
-        districtId,
-        blockId,
-        debouncedViewState,
-        navigate,
-        sheetSize,
-    ]);
-
-    // const getUserLocation = () => {
-    //     if (!navigator.geolocation) {
-    //         console.error('Geolocation is not supported by this browser.');
-    //     }
-    //     navigator.geolocation.getCurrentPosition(
-    //         (position) => {
-    //             const newViewState = { ...viewState, "longitude": position.coords.longitude, "latitude": position.coords.latitude, "zoom": 8, transitionDuration: 500, }
-    //             setViewState(newViewState);
-
-    //         },
-    //         (error) => {
-    //             console.error('Error getting user location:', error);
-    //         }
-    //     );
-    // };
 
     const zoom = viewState.zoom;
     const scale = 2 ** zoom;
