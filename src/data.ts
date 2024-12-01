@@ -31,6 +31,7 @@ export type SurveyCandidate = typeof survey.candidates[SurveyCandidateKey];
 export type SurveyCandedateAnswerKey = keyof SurveyCandidate["a"];
 export type SurveyQuestionKey = keyof typeof survey.questions;
 export type SurveyQuestion = typeof survey.questions[SurveyQuestionKey];
+export type SurveyCategoryKey = keyof typeof survey.categories;
 
 export type PartyKey = keyof typeof parties;
 export type Party = typeof parties[PartyKey];

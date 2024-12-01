@@ -7,7 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { encodeString, QueryParamConfig, useQueryParam } from 'use-query-params';
 import { isTouchDevice, SCREEN_ORIENTATION_TYPE } from '.';
 import { blockColors, colorPalette, palletChoice3, palletChoice4, palletChoice5, palletChoice6 } from '../colors';
-import { BlockKey, BlockName, BlockProperties, blocks, CandidateKey, candidates, DistrictKey, DistrictName, DistrictProperties, districts, geojsonBlocks, geojsonDistricts, iconBlockKickbacks, iconDistrictKickbacks, parties, PartyKey, ResultDistrictKey, results, survey, SurveyCandidateKey, SurveyQuestionKey, textBlockNames, textDistrictNames } from '../data';
+import { BlockKey, BlockName, BlockProperties, blocks, CandidateKey, candidates, DistrictKey, DistrictName, DistrictProperties, districts, geojsonBlocks, geojsonDistricts, iconBlockKickbacks, iconDistrictKickbacks, parties, PartyKey, ResultDistrictKey, results, survey, SurveyCandidateKey, SurveyCategoryKey, SurveyQuestionKey, textBlockNames, textDistrictNames } from '../data';
 import { BlockFull, BlockSmall, DistrictFull, DistrictSmall, Sheet, SheetSize } from './Sheets';
 
 const ZOOM_LEVEL = SCREEN_ORIENTATION_TYPE.includes("landscape") ? 5 : 4;
@@ -87,6 +87,7 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
     const [openDrawer, setOpenDrawer] = useState(false);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setViewData(viewDatas[event.target.id]);
+        setOpenDrawer(false);
     };
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -99,7 +100,7 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
     }, []);
 
     const question = survey.questions[viewData.id as SurveyQuestionKey]
-    const title = question?.title || "政党";
+    const title = question?.title || "小選挙区当選政党";
 
     return <>
         <div className="absolute top-0 left-0 w-svw md:w-96 p-4 ">
@@ -131,16 +132,24 @@ function FocusPanel({ viewData, setViewData }: { viewData: ViewData, setViewData
             >
                 <h5 className="text-xl font-bold tracking-tight text-gray-900">{title}</h5>
             </button>
-            <div className="flex flex-wrap gap-1">
+            <div>
+                <h6 className="text-sm font-medium text-gray-900">政党</h6>
                 <label>
                     <input type="radio" id={"party"} name="view-data" className="hidden peer" checked={viewData.id === "party"} onChange={handleChange} />
-                    <span className="text-xs font-medium px-2.5 py-0.5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100">政党</span>
+                    <span className="text-xs font-medium px-2.5 py-0.5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100">小選挙区当選政党</span>
                 </label>
-                {Object.values(survey.questions).map((question, index) => <label key={index}>
-                    <input type="radio" id={question.id} name="view-data" className="hidden peer" checked={viewData.id === question.id} onChange={handleChange} />
-                    <span className="text-xs font-medium px-2.5 py-0.5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100">{question.title}</span>
-                </label>)}
             </div>
+            {Object.keys(survey.categories).map((category, cindex) =>
+                <div key={cindex} className="mt-4">
+                    <h6 className="text-sm font-medium text-gray-900">{category}</h6>
+                    <div className="flex flex-wrap gap-1">
+                        {survey.categories[category as SurveyCategoryKey].map((qid) => <label key={qid}>
+                            <input type="radio" id={qid} name="view-data" className="hidden peer" checked={viewData.id === qid} onChange={handleChange} />
+                            <span className="text-xs font-medium px-2.5 py-0.5 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100">{survey.questions[qid as SurveyQuestionKey].title}</span>
+                        </label>)}
+                    </div>
+                </div>
+            )}
         </div>
     </>;
 }
